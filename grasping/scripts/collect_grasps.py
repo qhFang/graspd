@@ -12,6 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__
 
 from cio import CIO
 from grad import GradOpt
+from fc import FC
 
 @hydra.main(config_path="../conf/collect_grasps", config_name="config")
 def collect_grasps(cfg : DictConfig) -> None:
@@ -20,7 +21,7 @@ def collect_grasps(cfg : DictConfig) -> None:
     # here we loop through objects and random starts
     if cfg.collector_config.type in ["cio", "grad"]:
         if cfg.collector_config.type == "cio":
-            collector = CIO(cfg.collector_config)
+            collector = FC(cfg.collector_config)
         else:
             collector = GradOpt(cfg.collector_config)
 

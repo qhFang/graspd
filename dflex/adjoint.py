@@ -70,6 +70,9 @@ class spatial_matrix:
     def __init__(self):
         pass
 
+class wrench_matrix:
+    def __init__(self):
+        pass
 
 class spatial_transform:
     def __init__(self):
@@ -375,7 +378,6 @@ class LoadFunc:
             raise Exception("Load input 0 must be a tensor")
         if (args[1].type != int):
             raise Exception("Load input 1 must be a int")
-
         return args[0].type.type
 
 
@@ -388,6 +390,8 @@ class StoreFunc:
         if (args[1].type != int):
             raise Exception("Store input 1 must be a int")
         if (args[2].type != args[0].type.type):
+            for i in range(len(args)):
+                print(args[i].type)
             raise Exception(
                 "Store input 2 must be of the same type as the tensor")
 
@@ -535,18 +539,17 @@ class TransformMulFunc:
     def value_type(args):
         return spatial_transform
 
-# @builtin("spatial_transform_inertia")
-# class TransformInertiaFunc:
-#     @staticmethod
-#     def value_type(args):
-#         return spatial_matrix
-
-
 @builtin("spatial_adjoint")
 class SpatialAdjoint:
     @staticmethod
     def value_type(args):
         return spatial_matrix
+
+@builtin("wrench_grasp")
+class WrenchGrasp:
+    @staticmethod
+    def value_type(args):
+        return wrench_matrix
 
 
 @builtin("spatial_dot")
@@ -747,6 +750,7 @@ class Adjoint:
         for name, t in arg_types.items():
             adj.symbols[name] = Var(name, t, False)
 
+
         # build ordered list of args
         for a in adj.tree.body[0].args.args:
             adj.args.append(adj.symbols[a.arg])
@@ -763,7 +767,7 @@ class Adjoint:
 
         # recursively evaluate function body
         adj.eval(adj.tree.body[0])
-
+        
     # code generation methods
     def format_template(adj, template, input_vars, output_var):
 
@@ -952,7 +956,6 @@ class Adjoint:
     def eval(adj, node):
 
         try:
-
             if (isinstance(node, ast.FunctionDef)):
 
                 out = None
@@ -1640,7 +1643,6 @@ def codegen_kernel(adj, device='cpu'):
                         reverse_args=indent(reverse_args),
                         forward_body=forward_body,
                         reverse_body=reverse_body)
-
     return s
 
 
@@ -1790,7 +1792,6 @@ def func(f):
 
 
 def kernel(f):
-
     # stores source and compiled entry points for a kernel (will be populated after module loads)
     class Kernel:
         def __init__(self, f):
@@ -1829,6 +1830,7 @@ def compile():
 
     cpp_source += cpu_module_header
     cuda_source += cuda_module_header
+
 
     # kernels
     entry_points = []
@@ -1901,7 +1903,6 @@ def compile():
         if (cache_string == cpp_source):
             print("Using cached kernels")
             module = import_module("kernels", build_path)
-
             # register kernel methods
             for k in user_kernels.values():
                 k.register(module)
@@ -1967,12 +1968,13 @@ def compile():
     # update cache
     f = open(cache_file, 'w')
     f.write(cpp_source)
-    f.close()
+    print('Rebuilding complete')
 
     # register kernel methods
     for k in user_kernels.values():
         k.register(module)
 
+    print('')
     return module
 
 

@@ -518,6 +518,45 @@ struct spatial_matrix {
   }
 };
 
+struct wrench_matrix {
+  float data[6][3] = {{0}};
+
+  CUDA_CALLABLE inline wrench_matrix(float f = 0.0f) {}
+
+  CUDA_CALLABLE inline wrench_matrix(
+      float a00, float a01, float a02,
+      float a10, float a11, float a12,
+      float a20, float a21, float a22,
+      float a30, float a31, float a32,
+      float a40, float a41, float a42,
+      float a50, float a51, float a52) {
+    data[0][0] = a00;
+    data[0][1] = a01;
+    data[0][2] = a02;
+
+    data[1][0] = a10;
+    data[1][1] = a11;
+    data[1][2] = a12;
+
+    data[2][0] = a20;
+    data[2][1] = a21;
+    data[2][2] = a22;
+
+    data[3][0] = a30;
+    data[3][1] = a31;
+    data[3][2] = a32;
+
+    data[4][0] = a40;
+    data[4][1] = a41;
+    data[4][2] = a42;
+
+    data[5][0] = a50;
+    data[5][1] = a51;
+    data[5][2] = a52;
+  }
+};
+
+
 inline CUDA_CALLABLE float index(const spatial_matrix &m, int row, int col) {
   return m.data[row][col];
 }
@@ -532,6 +571,18 @@ inline CUDA_CALLABLE spatial_matrix add(const spatial_matrix &a,
 
   return out;
 }
+
+inline CUDA_CALLABLE wrench_matrix add(const wrench_matrix &a,
+                                        const wrench_matrix &b) {
+  wrench_matrix out;
+
+  for (int i = 0; i < 6; ++i)
+    for (int j = 0; j < 3; ++j)
+      out.data[i][j] = a.data[i][j] + b.data[i][j];
+
+  return out;
+}
+
 
 inline CUDA_CALLABLE spatial_vector mul(const spatial_matrix &a,
                                         const spatial_vector &b) {
@@ -626,6 +677,55 @@ inline CUDA_CALLABLE void adj_spatial_adjoint(const mat33 &R, const mat33 &S,
   }
 }
 
+inline CUDA_CALLABLE wrench_matrix wrench_grasp(const float3 &R) {
+  wrench_matrix adT;
+
+  // T = [I      ]
+  //     [skew(R)]
+
+  adT.data[0][0] = 1;
+  adT.data[0][1] = 0;
+  adT.data[0][2] = 0;
+
+  adT.data[1][0] = 0;
+  adT.data[1][1] = 1;
+  adT.data[1][2] = 0;
+
+  adT.data[2][0] = 0;
+  adT.data[2][1] = 0;
+  adT.data[2][2] = 1;
+
+  adT.data[3][0] = 0;
+  adT.data[3][1] = -R.z;
+  adT.data[3][2] = R.y;
+
+  adT.data[4][0] = R.z;
+  adT.data[4][1] = 0;
+  adT.data[4][2] = -R.x;
+
+  adT.data[5][0] = -R.y;
+  adT.data[5][1] = R.x;
+  adT.data[5][2] = 0;
+
+  return adT;
+}
+
+
+inline CUDA_CALLABLE void adj_wrench_grasp(const float3 &R, 
+                                           float3 &adj_R, 
+                                           const wrench_matrix &adj_ret) {
+  adj_R.x += adj_ret.data[5][1];
+  adj_R.x -= adj_ret.data[4][2];
+
+  adj_R.y += adj_ret.data[3][2];
+  adj_R.y -= adj_ret.data[5][0];
+
+  adj_R.z += adj_ret.data[4][0];
+  adj_R.z -= adj_ret.data[3][1];
+
+}
+
+
 /*
 // computes adj_t^-T*I*adj_t^-1 (tensor change of coordinates), Frank & Park,
 section 8.2.3, pg 290 inline CUDA_CALLABLE spatial_matrix
@@ -652,6 +752,14 @@ inline CUDA_CALLABLE void adj_add(const spatial_matrix &a,
                                   const spatial_matrix &b,
                                   spatial_matrix &adj_a, spatial_matrix &adj_b,
                                   const spatial_matrix &adj_ret) {
+  adj_a += adj_ret;
+  adj_b += adj_ret;
+}
+
+inline CUDA_CALLABLE void adj_add(const wrench_matrix &a,
+                                  const wrench_matrix &b,
+                                  wrench_matrix &adj_a, wrench_matrix &adj_b,
+                                  const wrench_matrix &adj_ret) {
   adj_a += adj_ret;
   adj_b += adj_ret;
 }

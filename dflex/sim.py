@@ -1207,7 +1207,8 @@ def eval_rigid_contacts_art(
     contact_f_s: df.tensor(df.spatial_vector),
     contact_world_pos_out: df.tensor(df.float3),
     contact_world_n_out: df.tensor(df.float3),
-    contact_world_dist_out: df.tensor(float)) :
+    contact_world_dist_out: df.tensor(float),
+    contact_matrix: df.tensor(df.wrench_matrix)) :
 
     tid = df.tid()
 
@@ -1482,6 +1483,8 @@ def eval_rigid_contacts_art(
         df.atomic_sub(body_f_s, c_body1, df.spatial_vector(t_total1, f_total))
     #df.atomic_sub(contact_f_s,tid,df.spatial_vector(t_total1,f_total))
 
+    
+
     # FOR RELAXATION just record, do not apply contact forces
     #df.atomic_sub(contact_f_s,tid,df.spatial_vector(t_total1,f_total))
     #df.atomic_sub(body_f_s, c_body1, df.spatial_vector(t_total1, f_total))
@@ -1490,6 +1493,10 @@ def eval_rigid_contacts_art(
     df.store(contact_world_dist_out,tid,d)
     df.store(contact_world_pos_out,tid,p)
     df.store(contact_world_n_out,tid,n)
+    df.store(contact_matrix,tid,df.wrench_grasp(r1))
+    if d > 0:
+        df.store(contact_matrix,tid,df.wrench_grasp(df.float3(0.0,0.0,0.0)))
+
 
 @df.func
 def lerp(
@@ -2606,15 +2613,16 @@ class SemiImplicitIntegrator:
 
         with dflex.util.ScopedTimer("simulate", False):
 
-            # alloc particle force buffer
+            # alloc particle force buffer   not used
             if (model.particle_count):
                 state_out.particle_f.zero_()
 
+            #
             if (model.link_count):
                 state_out.body_ft_s = torch.zeros((model.link_count, 6), dtype=torch.float32, device=model.adapter, requires_grad=True)
                 state_out.body_f_ext_s = torch.zeros((model.link_count, 6), dtype=torch.float32, device=model.adapter, requires_grad=True)
 
-            # damped springs
+            # damped springs                not used
             if (model.spring_count):
 
                 tape.launch(func=eval_springs,
@@ -2623,7 +2631,7 @@ class SemiImplicitIntegrator:
                             outputs=[state_out.particle_f],
                             adapter=model.adapter)
 
-            # triangle elastic and lift/drag forces
+            # triangle elastic and lift/drag forces     not used
             if (model.tri_count and model.tri_ke > 0.0):
 
                 tape.launch(func=eval_triangles,
@@ -2643,7 +2651,7 @@ class SemiImplicitIntegrator:
                             outputs=[state_out.particle_f],
                             adapter=model.adapter)
 
-            # triangle/triangle contacts
+            # triangle/triangle contacts            not used
             if (model.enable_tri_collisions and model.tri_count and model.tri_ke > 0.0):
                 tape.launch(func=eval_triangles_contact,
                             dim=model.tri_count * model.particle_count,
@@ -2663,7 +2671,7 @@ class SemiImplicitIntegrator:
                             outputs=[state_out.particle_f],
                             adapter=model.adapter)
 
-            # triangle bending
+            # triangle bending                  not used
             if (model.edge_count):
 
                 tape.launch(func=eval_bending,
@@ -2672,7 +2680,7 @@ class SemiImplicitIntegrator:
                             outputs=[state_out.particle_f],
                             adapter=model.adapter)
 
-            # particle ground contact
+            # particle ground contact           not used
             if (model.ground and model.particle_count):
 
                 tape.launch(func=eval_contacts,
@@ -2681,7 +2689,7 @@ class SemiImplicitIntegrator:
                             outputs=[state_out.particle_f],
                             adapter=model.adapter)
 
-            # tetrahedral FEM
+            # tetrahedral FEM                   not used
             if (model.tet_count):
 
                 tape.launch(func=eval_tetrahedra,
@@ -2695,8 +2703,7 @@ class SemiImplicitIntegrator:
             # articulations
 
             if (model.link_count):
-
-                # evaluate body transforms
+                # evaluate body transforms   (global transforms and COM)   
                 tape.launch(
                     func=eval_rigid_fk,
                     dim=model.articulation_count,
@@ -2717,8 +2724,8 @@ class SemiImplicitIntegrator:
                     ],
                     adapter=model.adapter,
                     preserve_output=True)
-
-                # evaluate joint inertias, motion vectors, and forces
+                
+                # evaluate joint inertias, motion vectors, and forces  v_s:twist     a_s:accelerate   f_s:net wrench(w/o contact)  joint_S_s:twist martix(not twist)
                 tape.launch(
                     func=eval_rigid_id,
                     dim=model.articulation_count,                       
@@ -2750,8 +2757,7 @@ class SemiImplicitIntegrator:
                     preserve_output=True)
 
                 if (model.contact_count > 0):
-                    
-                    # evaluate contact forces
+                    # evaluate contact forces   contact_world_dist:SDF   contact_world_n:normal  contact_world_pos:global transform  contact_f: wrench in contact point  body_f: net wrench
                     tape.launch(
                         func=eval_rigid_contacts_art,
                         dim=model.contact_count,
@@ -2780,12 +2786,13 @@ class SemiImplicitIntegrator:
                             state_out.contact_f_s,
                             state_out.contact_world_pos,
                             state_out.contact_world_n,
-                            state_out.contact_world_dist
+                            state_out.contact_world_dist,
+                            state_out.contact_matrix
                         ],
                         adapter=model.adapter,
                         preserve_output=True)
 
-                # particle shape contact
+                # particle shape contact        not used
                 if (model.particle_count):
                     
                     # tape.launch(func=eval_soft_contacts,
@@ -2818,7 +2825,7 @@ class SemiImplicitIntegrator:
                                     state_out.body_f_s],
                                 adapter=model.adapter)
 
-                # evaluate muscle actuation
+                # evaluate muscle actuation  not used
                 tape.launch(
                     func=eval_muscles,
                     dim=model.muscle_count,
@@ -2958,7 +2965,7 @@ class SemiImplicitIntegrator:
                         adapter=model.adapter,
                         skip_check_grad=True)
 
-                # solve for qdd
+                # solve for qdd          
                 tape.launch(
                     func=eval_dense_solve_batched,
                     dim=model.articulation_count,
@@ -2976,7 +2983,7 @@ class SemiImplicitIntegrator:
                     adapter=model.adapter,
                     skip_check_grad=True)
 
-                # integrate joint dofs -> joint coords
+                # integrate joint dofs -> joint coords   update qd and q
                 tape.launch(
                     func=eval_rigid_integrate,
                     dim=model.link_count,
@@ -2996,7 +3003,7 @@ class SemiImplicitIntegrator:
                     adapter=model.adapter)
 
             #----------------------------
-            # integrate particles
+            # integrate particles       not used
 
             if (model.particle_count):
                 tape.launch(func=integrate_particles,
@@ -3220,6 +3227,8 @@ def solve_contacts(
     lambda_f = df.max(mu*lambda_n, 0.0 - df.length(vt)*dt)
     delta_f = df.normalize(vt)*lambda_f
 
+    # delta_f - delta_n ((inverse delta_n towards object)
+    # why delta?
     df.atomic_add(delta, tid, delta_f - delta_n) 
 
 
@@ -3326,8 +3335,7 @@ class XPBDIntegrator:
             qd_pred = torch.zeros_like(state_in.particle_qd)
 
             #----------------------------
-            # integrate particles
-
+            # integrate particles       not used
             if (model.particle_count):
                 tape.launch(func=integrate_particles,
                             dim=model.particle_count,
@@ -3335,7 +3343,7 @@ class XPBDIntegrator:
                             outputs=[q_pred, qd_pred],
                             adapter=model.adapter)
 
-            # contacts
+            # contacts                  not used
             if (model.particle_count):
 
                 tape.launch(func=solve_contacts,
@@ -3344,7 +3352,7 @@ class XPBDIntegrator:
                             outputs=[state_out.particle_f],
                             adapter=model.adapter)
 
-            # damped springs
+            # damped springs            not used
             if (model.spring_count):
 
                 tape.launch(func=solve_springs,
@@ -3353,7 +3361,7 @@ class XPBDIntegrator:
                             outputs=[state_out.particle_f],
                             adapter=model.adapter)
 
-            # tetrahedral FEM
+            # tetrahedral FEM           not used
             if (model.tet_count):
 
                 tape.launch(func=solve_tetrahedra,

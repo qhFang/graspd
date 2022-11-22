@@ -506,6 +506,22 @@ namespace df
                m.data[4][0], m.data[4][1], m.data[4][2], m.data[4][3], m.data[4][4], m.data[4][5],
                m.data[5][0], m.data[5][1], m.data[5][2], m.data[5][3], m.data[5][4], m.data[5][5]);
     }
+    inline CUDA_CALLABLE void print(wrench_matrix m)
+    {
+        printf("%f %f %f\n"
+               "%f %f %f\n"
+               "%f %f %f\n"
+               "%f %f %f\n"
+               "%f %f %f\n"
+               "%f %f %f\n",
+               m.data[0][0], m.data[0][1], m.data[0][2],
+               m.data[1][0], m.data[1][1], m.data[1][2],
+               m.data[2][0], m.data[2][1], m.data[2][2],
+               m.data[3][0], m.data[3][1], m.data[3][2],
+               m.data[4][0], m.data[4][1], m.data[4][2],
+               m.data[5][0], m.data[5][1], m.data[5][2]);
+    }
+
 
     inline CUDA_CALLABLE void adj_print(int i, int &adj_i) { printf("%d adj: %d\n", i, adj_i); }
     inline CUDA_CALLABLE void adj_print(float i, float &adj_i) { printf("%f adj: %f\n", i, adj_i); }
@@ -516,5 +532,7 @@ namespace df
     inline CUDA_CALLABLE void adj_print(spatial_transform t, spatial_transform &adj_t) {}
     inline CUDA_CALLABLE void adj_print(spatial_vector t, spatial_vector &adj_t) {}
     inline CUDA_CALLABLE void adj_print(spatial_matrix t, spatial_matrix &adj_t) {}
+    inline CUDA_CALLABLE void adj_print(wrench_matrix t, wrench_matrix &adj_t) {}
+
 
 } // namespace df

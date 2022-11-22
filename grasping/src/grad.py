@@ -441,27 +441,27 @@ class GradOpt():
         }
 
         box_contact_forces = torch.zeros(self.n_vels, self.box_contact_inds.shape[0], 6)
-        for i in range(n):
-            self.model.contact_point0 = self.model.contact_point0.detach()
-            self.model.contact_kd = level_sets[i].item()
-            self.model.contact_alpha = alpha_schedule[i].item()
-            if i == 0 and render:
-                contact_point0_before = torch.clone(self.model.contact_point0)
-                mano_output = self.mano_layer(mano_q[None,:], self.mano_shape)
+        for i in range(n):                                                                          #optimization steps
+            self.model.contact_point0 = self.model.contact_point0.detach()                          #gradient clear
+            self.model.contact_kd = level_sets[i].item()                                            #smooth mesh?
+            self.model.contact_alpha = alpha_schedule[i].item()                                     #no idea
+            if i == 0 and render:                                                                   
+                contact_point0_before = torch.clone(self.model.contact_point0)                      
+                mano_output = self.mano_layer(mano_q[None,:], self.mano_shape)                      
                 vertices = mano_output.verts
                 vertices *= self.mano_ratio
-                self.model.contact_point0[self.box_contact_inds,:]= vertices[0,:,:].detach()
-                state = self.model.state()
-                state.joint_q[self.inds] = hand_q[:self.n_inds]
+                self.model.contact_point0[self.box_contact_inds,:]= vertices[0,:,:].detach()        #all pair->box_contact_inds=mano_inds
+                state = self.model.state()                                                                              
+                state.joint_q[self.inds] = hand_q[:self.n_inds]                                     #
                 state.joint_q[self.inds[0:3]] = self.pos_ratio*hand_q[0:3]
                 state.joint_q[self.inds[3:7]] = self.quat_ratio * hand_q[3:7]
 
                 m = 1
-                for k in range(m):
+                for k in range(m):                                                                  #forward
                     state = self.integrator.forward(
                         self.model, state, self.sim_dt,
                         update_mass_matrix=True)
-                self.model.contact_point0 = contact_point0_before
+                self.model.contact_point0 = contact_point0_before                                   #back?
 
                 m=stage.GetObjectAtPath("/root/body_0/mesh_0")
                 m.GetAttribute("points").Set(vertices[0,:,:].detach().cpu().numpy(),i)
@@ -481,11 +481,14 @@ class GradOpt():
             #self.model.contact_kd = level_sets[i]
             if i == 0:
                 for j in range(self.n_vels):
+                    # mano update
                     contact_point0_before = torch.clone(self.model.contact_point0)
                     mano_output = self.mano_layer(mano_q[None,:], self.mano_shape)
                     vertices = mano_output.verts
                     vertices *= self.mano_ratio
                     self.model.contact_point0[self.box_contact_inds,:] = vertices[0,:,:].detach()
+
+                    # global hand update?
                     state = self.model.state()
                     state.joint_q[self.inds] = hand_q[:self.n_inds]
                     state.joint_q[self.inds[0:3]] = self.pos_ratio*hand_q[0:3]

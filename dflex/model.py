@@ -403,11 +403,13 @@ class Model:
             s.body_a_s = torch.empty((self.link_count, 6), dtype=torch.float32, device=self.adapter, requires_grad=True)
             s.body_f_s = torch.zeros((self.link_count, 6), dtype=torch.float32, device=self.adapter, requires_grad=True)
             
+            
             if hasattr(self,"contact_body0"):
                 s.contact_f_s = torch.zeros((self.contact_count, 6), dtype=torch.float32, device=self.adapter, requires_grad=True)
                 s.contact_world_pos = torch.zeros((self.contact_count, 3), dtype=torch.float32, device=self.adapter, requires_grad=True)
                 s.contact_world_n = torch.zeros((self.contact_count, 3), dtype=torch.float32, device=self.adapter, requires_grad=True)
                 s.contact_world_dist = torch.zeros(self.contact_count, dtype=torch.float32, device=self.adapter, requires_grad=True)
+                s.contact_matrix = torch.zeros((self.contact_count, 6, 3), dtype=torch.float32, device=self.adapter, requires_grad=True)
             #s.body_ft_s = torch.zeros((self.link_count, 6), dtype=torch.float32, device=self.adapter, requires_grad=True)
             #s.body_f_ext_s = torch.zeros((self.link_count, 6), dtype=torch.float32, device=self.adapter, requires_grad=True)
 
@@ -650,15 +652,10 @@ class Model:
         self.contact_body1 = torch.tensor(body1, dtype=torch.int32, device=self.adapter)
         self.contact_shape0 = torch.tensor(shape0, dtype=torch.int32, device=self.adapter)
         self.contact_shape1 = torch.tensor(shape1, dtype=torch.int32, device=self.adapter)
-        self.contact_point0 = torch.tensor(point, dtype=torch.float32, device=self.adapter)
+        self.contact_point0 = torch.tensor(np.array(point), dtype=torch.float32, device=self.adapter)
         self.contact_dist = torch.tensor(dist, dtype=torch.float32, device=self.adapter)
         self.contact_material = torch.tensor(mat, dtype=torch.int32, device=self.adapter)
-
         self.contact_count = len(body0)
-
-
-
-
 
 class ModelBuilder:
     """A helper class for building simulation models at runtime.
@@ -1154,6 +1151,8 @@ class ModelBuilder:
         Returns:
             The index of the particle in the system
         """
+
+        assert (0+0)==1
         self.particle_q.append(pos)
         self.particle_qd.append(vel)
         self.particle_mass.append(mass)
@@ -1860,7 +1859,7 @@ class ModelBuilder:
         #---------------------
         # collision geometry
 
-        m.shape_transform = torch.tensor(transform_flatten_list(self.shape_transform), dtype=torch.float32, device=adapter)
+        m.shape_transform = torch.tensor(np.array(transform_flatten_list(self.shape_transform)), dtype=torch.float32, device=adapter)
         m.shape_body = torch.tensor(self.shape_body, dtype=torch.int32, device=adapter)
         m.shape_geo_type = torch.tensor(self.shape_geo_type, dtype=torch.int32, device=adapter)
         m.shape_geo_src = self.shape_geo_src
@@ -1922,7 +1921,7 @@ class ModelBuilder:
             body_I_m.append(spatial_matrix_from_inertia(self.body_inertia[i], self.body_mass[i]))
             body_X_cm.append(transform(self.body_com[i], quat_identity()))
         
-        m.body_I_m = torch.tensor(body_I_m, dtype=torch.float32, device=adapter)
+        m.body_I_m = torch.tensor(np.array(body_I_m), dtype=torch.float32, device=adapter)
 
 
         articulation_count = len(self.articulation_start)
@@ -2005,9 +2004,9 @@ class ModelBuilder:
         # model
         m.joint_type = torch.tensor(self.joint_type, dtype=torch.int32, device=adapter)
         m.joint_parent = torch.tensor(self.joint_parent, dtype=torch.int32, device=adapter)
-        m.joint_X_pj = torch.tensor(transform_flatten_list(self.joint_X_pj), dtype=torch.float32, device=adapter)
-        m.joint_X_cm = torch.tensor(transform_flatten_list(body_X_cm), dtype=torch.float32, device=adapter)
-        m.joint_axis = torch.tensor(self.joint_axis, dtype=torch.float32, device=adapter)
+        m.joint_X_pj = torch.tensor(np.array(transform_flatten_list(self.joint_X_pj)), dtype=torch.int32, device=adapter)
+        m.joint_X_cm = torch.tensor(np.array(transform_flatten_list(body_X_cm)), dtype=torch.float32, device=adapter)
+        m.joint_axis = torch.tensor(np.array(self.joint_axis), dtype=torch.float32, device=adapter)
         m.joint_q_start = torch.tensor(self.joint_q_start, dtype=torch.int32, device=adapter) 
         m.joint_qd_start = torch.tensor(self.joint_qd_start, dtype=torch.int32, device=adapter)
 
@@ -2041,7 +2040,7 @@ class ModelBuilder:
         
         # store refs to geometry
         m.geo_meshes = self.geo_meshes
-        m.geo_sdfs = [torch.tensor(x, dtype=torch.float32, device=adapter) for x in self.geo_sdfs]
+        m.geo_sdfs = [x.clone().detach().float().to(adapter) for x in self.geo_sdfs]
 
         # enable ground plane
         m.ground = True
