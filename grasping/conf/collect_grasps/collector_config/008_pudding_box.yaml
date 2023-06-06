@@ -1,0 +1,13 @@
+type: cio
+device: cuda:0
+n_starts: 50
+name: 008_pudding_box
+dataset: YCB
+coarse_to_fine: False
+
+object:
+  name: mesh_sdf
+  primitive_type: mesh_sdf
+  sdf_path: /apdcephfs/private_qihangfang/Data/fcdata/ycb/008_pudding_box/google_16k/sdf.npy
+  mesh_path: /apdcephfs/private_qihangfang/Data/fcdata/ycb/008_pudding_box/google_16k/textured.obj
+  rescale: 0.2

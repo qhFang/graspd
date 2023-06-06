@@ -1,0 +1,13 @@
+type: cio
+device: cuda:0
+n_starts: 20
+name: ycb_072-d_toy_airplane_scaled
+dataset: IBS
+coarse_to_fine: False
+
+object:
+  name: mesh_sdf
+  primitive_type: mesh_sdf
+  sdf_path: /apdcephfs/share_1330077/qihangfang/Data/ibs/ycb_072-d_toy_airplane_scaled/sdf.npy
+  mesh_path: /apdcephfs/share_1330077/qihangfang/Data/ibs/ycb_072-d_toy_airplane_scaled/textured.obj
+  rescale: 0.2

@@ -148,8 +148,12 @@ void CUDA_CALLABLE inline dense_chol(int n, const float *__restrict__ A,
       s -= r * r;
     }
 
+    if (s < 0) {
+      s = 0;
+    }
+
     s = sqrtf(s);
-    const float invS = 1.0f / s;
+    const float invS = 1.0f / (s+1e-8);
 
     L[dense_index(n, j, j)] = s;
 
@@ -189,7 +193,7 @@ CUDA_CALLABLE inline void dense_subs(int n, const float *__restrict__ L,
       s -= L[dense_index(n, i, j)] * x[j];
     }
 
-    x[i] = s / L[dense_index(n, i, i)];
+    x[i] = s / (L[dense_index(n, i, i)] + 1e-8);
   }
 
   // backward substitution
@@ -200,7 +204,7 @@ CUDA_CALLABLE inline void dense_subs(int n, const float *__restrict__ L,
       s -= L[dense_index(n, j, i)] * x[j];
     }
 
-    x[i] = s / L[dense_index(n, i, i)];
+    x[i] = s / (L[dense_index(n, i, i)] + 1e-8);
   }
 }
 

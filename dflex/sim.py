@@ -1205,7 +1205,10 @@ def eval_rigid_contacts_art(
     alpha: float,
     body_f_s: df.tensor(df.spatial_vector), 
     contact_f_s: df.tensor(df.spatial_vector),
+    contact_f_s_normal: df.tensor(df.spatial_vector),
+    contact_leaky_f_s: df.tensor(df.spatial_vector),
     contact_world_pos_out: df.tensor(df.float3),
+    contact_local_pos_out: df.tensor(df.float3),
     contact_world_n_out: df.tensor(df.float3),
     contact_world_dist_out: df.tensor(float),
     contact_matrix: df.tensor(df.wrench_matrix)) :
@@ -1376,6 +1379,7 @@ def eval_rigid_contacts_art(
         #     if d > 0.0:
         #         c = alpha * (1.0-df.exp(0.0-beta*d))
         #     c = c - alpha
+        leaky_c = d-kd
         c = df.leaky_min(d-kd, 0.0, 0.1)
 
         eps = 1e-5
@@ -1428,6 +1432,8 @@ def eval_rigid_contacts_art(
     
     # contact elastic
     fn = n * c * ke
+    fn_normal = n * ke
+    leaky_fn = n * leaky_c
 
     # contact damping
     fd = n * df.min(vn, 0.0) * kd
@@ -1442,6 +1448,8 @@ def eval_rigid_contacts_art(
     ft_dir = df.normalize(vt)
 
     ft = ft_dir * df.max(df.length(vt) * kf * c, mu * (c * ke)) * (0.0-1.0)
+    leaky_ft = ft_dir * df.max(df.length(vt) * kf * leaky_c, mu * (leaky_c * ke)) * (0.0-1.0)
+    leaky_ft = leaky_ft * (1. / ke)
 
     #if c_body1 == 24 and c_body0 == 5:
         #df.print(df.length(vt))
@@ -1472,8 +1480,12 @@ def eval_rigid_contacts_art(
     #r0 = df.spatial_transform_vector(X_s, c_point)
 
     f_total = fn + ft# + fd * df.step(c)
+    f_total_normal = fn_normal
+    leaky_f_total = leaky_fn + leaky_ft
     t_total0 = df.cross(r0, f_total)
     t_total1 = df.cross(r1, f_total)
+    t_total1_normal = df.cross(r1, f_total_normal)
+    leaky_t_total1 = df.cross(r1, leaky_f_total)
 
     # IF STATEMENTS WHEN EVALUATING
     #if c_body0 == 26:
@@ -1489,13 +1501,17 @@ def eval_rigid_contacts_art(
     #df.atomic_sub(contact_f_s,tid,df.spatial_vector(t_total1,f_total))
     #df.atomic_sub(body_f_s, c_body1, df.spatial_vector(t_total1, f_total))
     df.atomic_sub(contact_f_s,tid,df.spatial_vector(t_total1,f_total))
+    df.atomic_sub(contact_f_s_normal,tid,df.spatial_vector(t_total1_normal,f_total_normal))
+    df.atomic_sub(contact_leaky_f_s,tid,df.spatial_vector(leaky_t_total1,leaky_f_total))
+    
 
     df.store(contact_world_dist_out,tid,d)
     df.store(contact_world_pos_out,tid,p)
+    df.store(contact_local_pos_out,tid,x_local)
     df.store(contact_world_n_out,tid,n)
     df.store(contact_matrix,tid,df.wrench_grasp(r1))
-    if d > 0:
-        df.store(contact_matrix,tid,df.wrench_grasp(df.float3(0.0,0.0,0.0)))
+    #if d > 0:
+    #    df.store(contact_matrix,tid,df.wrench_grasp(df.float3(0.0,0.0,0.0)))
 
 
 @df.func
@@ -2757,7 +2773,7 @@ class SemiImplicitIntegrator:
                     preserve_output=True)
 
                 if (model.contact_count > 0):
-                    # evaluate contact forces   contact_world_dist:SDF   contact_world_n:normal  contact_world_pos:global transform  contact_f: wrench in contact point  body_f: net wrench
+                    # evaluate contact forces   contact_world_dist:SDF   contact_world_n:normal  contact_world_pos:global transform  contact_f: wrench in contact point  body_f: net wrench                    
                     tape.launch(
                         func=eval_rigid_contacts_art,
                         dim=model.contact_count,
@@ -2784,7 +2800,10 @@ class SemiImplicitIntegrator:
                         outputs=[
                             state_out.body_f_s,
                             state_out.contact_f_s,
+                            state_out.contact_f_s_normal,
+                            state_out.contact_leaky_f_s,
                             state_out.contact_world_pos,
+                            state_out.contact_local_pos,
                             state_out.contact_world_n,
                             state_out.contact_world_dist,
                             state_out.contact_matrix
@@ -2964,7 +2983,6 @@ class SemiImplicitIntegrator:
                         ],
                         adapter=model.adapter,
                         skip_check_grad=True)
-
                 # solve for qdd          
                 tape.launch(
                     func=eval_dense_solve_batched,

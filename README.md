@@ -23,5 +23,6 @@ grasping/data/ycb
 ```
 
 ## Getting started
-To collect grasps for the YCB banana, try running `python grasping/scripts/collect_grasps.py collector_config=011_banana`.
+To collect grasps for the YCB banana, try running `python grasping/scripts/graspd.py collector_config=kit_Seal_scaled`.
 See `grasping/conf/collect_grasps` for configuration options.
+python grasping/scripts/collect_grasps.py collector_config=007_tuna_fish_can

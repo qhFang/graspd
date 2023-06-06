@@ -406,7 +406,10 @@ class Model:
             
             if hasattr(self,"contact_body0"):
                 s.contact_f_s = torch.zeros((self.contact_count, 6), dtype=torch.float32, device=self.adapter, requires_grad=True)
+                s.contact_f_s_normal = torch.zeros((self.contact_count, 6), dtype=torch.float32, device=self.adapter, requires_grad=True)
+                s.contact_leaky_f_s = torch.zeros((self.contact_count, 6), dtype=torch.float32, device=self.adapter, requires_grad=True)
                 s.contact_world_pos = torch.zeros((self.contact_count, 3), dtype=torch.float32, device=self.adapter, requires_grad=True)
+                s.contact_local_pos = torch.zeros((self.contact_count, 3), dtype=torch.float32, device=self.adapter, requires_grad=True)
                 s.contact_world_n = torch.zeros((self.contact_count, 3), dtype=torch.float32, device=self.adapter, requires_grad=True)
                 s.contact_world_dist = torch.zeros(self.contact_count, dtype=torch.float32, device=self.adapter, requires_grad=True)
                 s.contact_matrix = torch.zeros((self.contact_count, 6, 3), dtype=torch.float32, device=self.adapter, requires_grad=True)
@@ -1152,7 +1155,6 @@ class ModelBuilder:
             The index of the particle in the system
         """
 
-        assert (0+0)==1
         self.particle_q.append(pos)
         self.particle_qd.append(vel)
         self.particle_mass.append(mass)
@@ -2004,7 +2006,7 @@ class ModelBuilder:
         # model
         m.joint_type = torch.tensor(self.joint_type, dtype=torch.int32, device=adapter)
         m.joint_parent = torch.tensor(self.joint_parent, dtype=torch.int32, device=adapter)
-        m.joint_X_pj = torch.tensor(np.array(transform_flatten_list(self.joint_X_pj)), dtype=torch.int32, device=adapter)
+        m.joint_X_pj = torch.tensor(np.array(transform_flatten_list(self.joint_X_pj)), dtype=torch.float32, device=adapter)
         m.joint_X_cm = torch.tensor(np.array(transform_flatten_list(body_X_cm)), dtype=torch.float32, device=adapter)
         m.joint_axis = torch.tensor(np.array(self.joint_axis), dtype=torch.float32, device=adapter)
         m.joint_q_start = torch.tensor(self.joint_q_start, dtype=torch.int32, device=adapter) 

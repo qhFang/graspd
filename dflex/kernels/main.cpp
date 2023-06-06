@@ -13475,7 +13475,10 @@ void eval_rigid_contacts_art_cuda_forward(int dim,
 	float var_alpha,
 	torch::Tensor var_body_f_s,
 	torch::Tensor var_contact_f_s,
+	torch::Tensor var_contact_f_s_normal,
+	torch::Tensor var_contact_leaky_f_s,
 	torch::Tensor var_contact_world_pos_out,
+	torch::Tensor var_contact_local_pos_out,
 	torch::Tensor var_contact_world_n_out,
 	torch::Tensor var_contact_world_dist_out,
 	torch::Tensor var_contact_matrix);
@@ -13502,7 +13505,10 @@ void eval_rigid_contacts_art_cuda_backward(int dim,
 	float var_alpha,
 	torch::Tensor var_body_f_s,
 	torch::Tensor var_contact_f_s,
+	torch::Tensor var_contact_f_s_normal,
+	torch::Tensor var_contact_leaky_f_s,
 	torch::Tensor var_contact_world_pos_out,
+	torch::Tensor var_contact_local_pos_out,
 	torch::Tensor var_contact_world_n_out,
 	torch::Tensor var_contact_world_dist_out,
 	torch::Tensor var_contact_matrix, 
@@ -13527,7 +13533,10 @@ void eval_rigid_contacts_art_cuda_backward(int dim,
 	float adj_alpha,
 	torch::Tensor adj_body_f_s,
 	torch::Tensor adj_contact_f_s,
+	torch::Tensor adj_contact_f_s_normal,
+	torch::Tensor adj_contact_leaky_f_s,
 	torch::Tensor adj_contact_world_pos_out,
+	torch::Tensor adj_contact_local_pos_out,
 	torch::Tensor adj_contact_world_n_out,
 	torch::Tensor adj_contact_world_dist_out,
 	torch::Tensor adj_contact_matrix);
@@ -13555,7 +13564,10 @@ void eval_rigid_contacts_art_cpu_kernel_forward(
 	float var_alpha,
 	spatial_vector* var_body_f_s,
 	spatial_vector* var_contact_f_s,
+	spatial_vector* var_contact_f_s_normal,
+	spatial_vector* var_contact_leaky_f_s,
 	df::float3* var_contact_world_pos_out,
+	df::float3* var_contact_local_pos_out,
 	df::float3* var_contact_world_n_out,
 	float* var_contact_world_dist_out,
 	wrench_matrix* var_contact_matrix)
@@ -13694,89 +13706,105 @@ void eval_rigid_contacts_art_cpu_kernel_forward(
     float var_129;
     float var_130;
     float var_131;
-    const float var_132 = 1e-05;
-    float var_133;
+    float var_132;
+    const float var_133 = 1e-05;
     float var_134;
     float var_135;
     float var_136;
-    df::float3 var_137;
-    float var_138;
+    float var_137;
+    df::float3 var_138;
     float var_139;
-    df::float3 var_140;
-    float var_141;
+    float var_140;
+    df::float3 var_141;
     float var_142;
-    const float var_143 = 2.0;
-    float var_144;
+    float var_143;
+    const float var_144 = 2.0;
     float var_145;
     float var_146;
-    df::float3 var_147;
-    float var_148;
+    float var_147;
+    df::float3 var_148;
     float var_149;
-    df::float3 var_150;
-    float var_151;
+    float var_150;
+    df::float3 var_151;
     float var_152;
     float var_153;
     float var_154;
     float var_155;
-    df::float3 var_156;
-    float var_157;
+    float var_156;
+    df::float3 var_157;
     float var_158;
-    df::float3 var_159;
-    float var_160;
+    float var_159;
+    df::float3 var_160;
     float var_161;
     float var_162;
     float var_163;
-    df::float3 var_164;
+    float var_164;
     df::float3 var_165;
     df::float3 var_166;
     df::float3 var_167;
-    float var_168;
+    df::float3 var_168;
     float var_169;
-    bool var_170;
-    float var_171;
-    df::float3 var_172;
+    float var_170;
+    bool var_171;
+    float var_172;
     df::float3 var_173;
-    spatial_vector var_174;
+    df::float3 var_174;
     spatial_vector var_175;
-    df::float3 var_176;
+    spatial_vector var_176;
     df::float3 var_177;
     df::float3 var_178;
     df::float3 var_179;
     df::float3 var_180;
     df::float3 var_181;
     df::float3 var_182;
-    float var_183;
-    df::float3 var_184;
+    df::float3 var_183;
+    float var_184;
     df::float3 var_185;
     df::float3 var_186;
     df::float3 var_187;
-    float var_188;
+    df::float3 var_188;
     df::float3 var_189;
     df::float3 var_190;
     float var_191;
-    float var_192;
-    float var_193;
-    df::float3 var_194;
+    df::float3 var_192;
+    df::float3 var_193;
+    float var_194;
     float var_195;
     float var_196;
-    float var_197;
+    df::float3 var_197;
     float var_198;
     float var_199;
     float var_200;
-    df::float3 var_201;
+    float var_201;
     float var_202;
-    df::float3 var_203;
+    float var_203;
     df::float3 var_204;
-    df::float3 var_205;
+    float var_205;
     df::float3 var_206;
-    const int var_207 = 6;
-    bool var_208;
-    spatial_vector var_209;
-    spatial_vector var_210;
-    wrench_matrix var_211;
-    bool var_212;
+    float var_207;
+    float var_208;
+    float var_209;
+    float var_210;
+    float var_211;
+    float var_212;
     df::float3 var_213;
-    wrench_matrix var_214;
+    float var_214;
+    df::float3 var_215;
+    float var_216;
+    df::float3 var_217;
+    df::float3 var_218;
+    df::float3 var_219;
+    df::float3 var_220;
+    df::float3 var_221;
+    df::float3 var_222;
+    df::float3 var_223;
+    const int var_224 = 6;
+    bool var_225;
+    spatial_vector var_226;
+    spatial_vector var_227;
+    spatial_vector var_228;
+    spatial_vector var_229;
+    wrench_matrix var_230;
     //---------
     // forward
     var_0 = df::tid();
@@ -13915,101 +13943,117 @@ void eval_rigid_contacts_art_cpu_kernel_forward(
     	var_128 = get_sdf_cpu_func(var_92, var_82, var_geo_sdf, var_0);
     	var_129 = df::sub(var_128, var_6);
     	var_130 = df::sub(var_129, var_66);
-    	var_131 = df::leaky_min(var_130, var_29, var_119);
-    	var_133 = df::index(var_82, var_8);
-    	var_134 = df::index(var_82, var_9);
-    	var_135 = df::index(var_82, var_20);
-    	var_136 = df::add(var_133, var_132);
-    	var_137 = df::float3(var_136, var_134, var_135);
-    	var_138 = get_sdf_cpu_func(var_92, var_137, var_geo_sdf, var_0);
-    	var_139 = df::sub(var_133, var_132);
-    	var_140 = df::float3(var_139, var_134, var_135);
-    	var_141 = get_sdf_cpu_func(var_92, var_140, var_geo_sdf, var_0);
-    	var_142 = df::sub(var_138, var_141);
-    	var_144 = df::mul(var_143, var_132);
-    	var_145 = df::div(var_142, var_144);
-    	var_146 = df::add(var_134, var_132);
-    	var_147 = df::float3(var_133, var_146, var_135);
-    	var_148 = get_sdf_cpu_func(var_92, var_147, var_geo_sdf, var_0);
-    	var_149 = df::sub(var_134, var_132);
-    	var_150 = df::float3(var_133, var_149, var_135);
-    	var_151 = get_sdf_cpu_func(var_92, var_150, var_geo_sdf, var_0);
-    	var_152 = df::sub(var_148, var_151);
-    	var_153 = df::mul(var_143, var_132);
-    	var_154 = df::div(var_152, var_153);
-    	var_155 = df::add(var_135, var_132);
-    	var_156 = df::float3(var_133, var_134, var_155);
-    	var_157 = get_sdf_cpu_func(var_92, var_156, var_geo_sdf, var_0);
-    	var_158 = df::sub(var_135, var_132);
-    	var_159 = df::float3(var_133, var_134, var_158);
-    	var_160 = get_sdf_cpu_func(var_92, var_159, var_geo_sdf, var_0);
-    	var_161 = df::sub(var_157, var_160);
-    	var_162 = df::mul(var_143, var_132);
-    	var_163 = df::div(var_161, var_162);
-    	var_164 = df::float3(var_145, var_154, var_163);
-    	var_165 = df::normalize(var_164);
-    	var_166 = df::spatial_transform_vector(var_80, var_165);
+    	var_131 = df::sub(var_129, var_66);
+    	var_132 = df::leaky_min(var_131, var_29, var_119);
+    	var_134 = df::index(var_82, var_8);
+    	var_135 = df::index(var_82, var_9);
+    	var_136 = df::index(var_82, var_20);
+    	var_137 = df::add(var_134, var_133);
+    	var_138 = df::float3(var_137, var_135, var_136);
+    	var_139 = get_sdf_cpu_func(var_92, var_138, var_geo_sdf, var_0);
+    	var_140 = df::sub(var_134, var_133);
+    	var_141 = df::float3(var_140, var_135, var_136);
+    	var_142 = get_sdf_cpu_func(var_92, var_141, var_geo_sdf, var_0);
+    	var_143 = df::sub(var_139, var_142);
+    	var_145 = df::mul(var_144, var_133);
+    	var_146 = df::div(var_143, var_145);
+    	var_147 = df::add(var_135, var_133);
+    	var_148 = df::float3(var_134, var_147, var_136);
+    	var_149 = get_sdf_cpu_func(var_92, var_148, var_geo_sdf, var_0);
+    	var_150 = df::sub(var_135, var_133);
+    	var_151 = df::float3(var_134, var_150, var_136);
+    	var_152 = get_sdf_cpu_func(var_92, var_151, var_geo_sdf, var_0);
+    	var_153 = df::sub(var_149, var_152);
+    	var_154 = df::mul(var_144, var_133);
+    	var_155 = df::div(var_153, var_154);
+    	var_156 = df::add(var_136, var_133);
+    	var_157 = df::float3(var_134, var_135, var_156);
+    	var_158 = get_sdf_cpu_func(var_92, var_157, var_geo_sdf, var_0);
+    	var_159 = df::sub(var_136, var_133);
+    	var_160 = df::float3(var_134, var_135, var_159);
+    	var_161 = get_sdf_cpu_func(var_92, var_160, var_geo_sdf, var_0);
+    	var_162 = df::sub(var_158, var_161);
+    	var_163 = df::mul(var_144, var_133);
+    	var_164 = df::div(var_162, var_163);
+    	var_165 = df::float3(var_146, var_155, var_164);
+    	var_166 = df::normalize(var_165);
+    	var_167 = df::spatial_transform_vector(var_80, var_166);
     }
-    var_167 = df::select(var_127, var_125, var_166);
-    var_168 = df::select(var_127, var_126, var_131);
-    var_169 = df::select(var_127, var_113, var_129);
-    var_170 = (var_83 == var_8);
-    if (var_170) {
-    	var_171 = df::sub(var_29, var_30);
-    	var_172 = df::mul(var_167, var_171);
+    var_168 = df::select(var_127, var_125, var_167);
+    var_169 = df::select(var_127, var_126, var_132);
+    var_170 = df::select(var_127, var_113, var_129);
+    var_171 = (var_83 == var_8);
+    if (var_171) {
+    	var_172 = df::sub(var_29, var_30);
+    	var_173 = df::mul(var_168, var_172);
     }
-    var_173 = df::select(var_170, var_90, var_172);
-    var_174 = df::spatial_vector();
-    var_175 = df::load(var_body_v_s, var_2);
-    var_176 = df::spatial_top(var_175);
-    var_177 = df::spatial_bottom(var_175);
-    var_178 = df::spatial_transform_get_translation(var_78);
-    var_179 = df::sub(var_71, var_178);
-    var_180 = df::cross(var_176, var_179);
-    var_181 = df::add(var_177, var_180);
-    var_182 = df::sub(var_77, var_181);
-    var_183 = df::dot(var_167, var_182);
-    var_184 = df::mul(var_167, var_183);
-    var_185 = df::sub(var_182, var_184);
-    var_186 = df::mul(var_167, var_168);
-    var_187 = df::mul(var_186, var_65);
-    var_188 = df::min(var_183, var_29);
-    var_189 = df::mul(var_167, var_188);
-    var_190 = df::mul(var_189, var_66);
-    var_191 = df::mul(var_168, var_65);
-    var_192 = df::mul(var_68, var_191);
-    var_193 = df::sub(var_29, var_192);
-    var_194 = df::normalize(var_185);
-    var_195 = df::length(var_185);
-    var_196 = df::mul(var_195, var_67);
-    var_197 = df::mul(var_196, var_168);
-    var_198 = df::mul(var_168, var_65);
-    var_199 = df::mul(var_68, var_198);
-    var_200 = df::max(var_197, var_199);
-    var_201 = df::mul(var_194, var_200);
-    var_202 = df::sub(var_29, var_30);
-    var_203 = df::mul(var_201, var_202);
-    var_204 = df::add(var_187, var_203);
-    var_205 = df::cross(var_75, var_204);
-    var_206 = df::cross(var_179, var_204);
-    var_208 = (var_2 == var_207);
-    if (var_208) {
-    	var_209 = df::spatial_vector(var_206, var_204);
-    	df::atomic_sub(var_body_f_s, var_2, var_209);
+    var_174 = df::select(var_171, var_90, var_173);
+    var_175 = df::spatial_vector();
+    var_176 = df::load(var_body_v_s, var_2);
+    var_177 = df::spatial_top(var_176);
+    var_178 = df::spatial_bottom(var_176);
+    var_179 = df::spatial_transform_get_translation(var_78);
+    var_180 = df::sub(var_71, var_179);
+    var_181 = df::cross(var_177, var_180);
+    var_182 = df::add(var_178, var_181);
+    var_183 = df::sub(var_77, var_182);
+    var_184 = df::dot(var_168, var_183);
+    var_185 = df::mul(var_168, var_184);
+    var_186 = df::sub(var_183, var_185);
+    var_187 = df::mul(var_168, var_169);
+    var_188 = df::mul(var_187, var_65);
+    var_189 = df::mul(var_168, var_65);
+    var_190 = df::mul(var_168, var_130);
+    var_191 = df::min(var_184, var_29);
+    var_192 = df::mul(var_168, var_191);
+    var_193 = df::mul(var_192, var_66);
+    var_194 = df::mul(var_169, var_65);
+    var_195 = df::mul(var_68, var_194);
+    var_196 = df::sub(var_29, var_195);
+    var_197 = df::normalize(var_186);
+    var_198 = df::length(var_186);
+    var_199 = df::mul(var_198, var_67);
+    var_200 = df::mul(var_199, var_169);
+    var_201 = df::mul(var_169, var_65);
+    var_202 = df::mul(var_68, var_201);
+    var_203 = df::max(var_200, var_202);
+    var_204 = df::mul(var_197, var_203);
+    var_205 = df::sub(var_29, var_30);
+    var_206 = df::mul(var_204, var_205);
+    var_207 = df::length(var_186);
+    var_208 = df::mul(var_207, var_67);
+    var_209 = df::mul(var_208, var_130);
+    var_210 = df::mul(var_130, var_65);
+    var_211 = df::mul(var_68, var_210);
+    var_212 = df::max(var_209, var_211);
+    var_213 = df::mul(var_197, var_212);
+    var_214 = df::sub(var_29, var_30);
+    var_215 = df::mul(var_213, var_214);
+    var_216 = df::div(var_30, var_65);
+    var_217 = df::mul(var_215, var_216);
+    var_218 = df::add(var_188, var_206);
+    var_219 = df::add(var_190, var_217);
+    var_220 = df::cross(var_75, var_218);
+    var_221 = df::cross(var_180, var_218);
+    var_222 = df::cross(var_180, var_189);
+    var_223 = df::cross(var_180, var_219);
+    var_225 = (var_2 == var_224);
+    if (var_225) {
+    	var_226 = df::spatial_vector(var_221, var_218);
+    	df::atomic_sub(var_body_f_s, var_2, var_226);
     }
-    var_210 = df::spatial_vector(var_206, var_204);
-    df::atomic_sub(var_contact_f_s, var_0, var_210);
-    df::store(var_contact_world_dist_out, var_0, var_169);
+    var_227 = df::spatial_vector(var_221, var_218);
+    df::atomic_sub(var_contact_f_s, var_0, var_227);
+    var_228 = df::spatial_vector(var_222, var_189);
+    df::atomic_sub(var_contact_f_s_normal, var_0, var_228);
+    var_229 = df::spatial_vector(var_223, var_219);
+    df::atomic_sub(var_contact_leaky_f_s, var_0, var_229);
+    df::store(var_contact_world_dist_out, var_0, var_170);
     df::store(var_contact_world_pos_out, var_0, var_71);
-    df::store(var_contact_world_n_out, var_0, var_167);
-    var_211 = df::wrench_grasp(var_179);
-    df::store(var_contact_matrix, var_0, var_211);
-    var_212 = (var_169 > var_8);
-    if (var_212) {
-    	var_213 = df::float3(var_29, var_29, var_29);
-    	var_214 = df::wrench_grasp(var_213);
-    	df::store(var_contact_matrix, var_0, var_214);
-    }
+    df::store(var_contact_local_pos_out, var_0, var_82);
+    df::store(var_contact_world_n_out, var_0, var_168);
+    var_230 = df::wrench_grasp(var_180);
+    df::store(var_contact_matrix, var_0, var_230);
     
 
 }
@@ -14036,7 +14080,10 @@ void eval_rigid_contacts_art_cpu_kernel_backward(
 	float var_alpha,
 	spatial_vector* var_body_f_s,
 	spatial_vector* var_contact_f_s,
+	spatial_vector* var_contact_f_s_normal,
+	spatial_vector* var_contact_leaky_f_s,
 	df::float3* var_contact_world_pos_out,
+	df::float3* var_contact_local_pos_out,
 	df::float3* var_contact_world_n_out,
 	float* var_contact_world_dist_out,
 	wrench_matrix* var_contact_matrix, 
@@ -14061,7 +14108,10 @@ void eval_rigid_contacts_art_cpu_kernel_backward(
 	float adj_alpha,
 	spatial_vector* adj_body_f_s,
 	spatial_vector* adj_contact_f_s,
+	spatial_vector* adj_contact_f_s_normal,
+	spatial_vector* adj_contact_leaky_f_s,
 	df::float3* adj_contact_world_pos_out,
+	df::float3* adj_contact_local_pos_out,
 	df::float3* adj_contact_world_n_out,
 	float* adj_contact_world_dist_out,
 	wrench_matrix* adj_contact_matrix)
@@ -14200,89 +14250,105 @@ void eval_rigid_contacts_art_cpu_kernel_backward(
     float var_129;
     float var_130;
     float var_131;
-    const float var_132 = 1e-05;
-    float var_133;
+    float var_132;
+    const float var_133 = 1e-05;
     float var_134;
     float var_135;
     float var_136;
-    df::float3 var_137;
-    float var_138;
+    float var_137;
+    df::float3 var_138;
     float var_139;
-    df::float3 var_140;
-    float var_141;
+    float var_140;
+    df::float3 var_141;
     float var_142;
-    const float var_143 = 2.0;
-    float var_144;
+    float var_143;
+    const float var_144 = 2.0;
     float var_145;
     float var_146;
-    df::float3 var_147;
-    float var_148;
+    float var_147;
+    df::float3 var_148;
     float var_149;
-    df::float3 var_150;
-    float var_151;
+    float var_150;
+    df::float3 var_151;
     float var_152;
     float var_153;
     float var_154;
     float var_155;
-    df::float3 var_156;
-    float var_157;
+    float var_156;
+    df::float3 var_157;
     float var_158;
-    df::float3 var_159;
-    float var_160;
+    float var_159;
+    df::float3 var_160;
     float var_161;
     float var_162;
     float var_163;
-    df::float3 var_164;
+    float var_164;
     df::float3 var_165;
     df::float3 var_166;
     df::float3 var_167;
-    float var_168;
+    df::float3 var_168;
     float var_169;
-    bool var_170;
-    float var_171;
-    df::float3 var_172;
+    float var_170;
+    bool var_171;
+    float var_172;
     df::float3 var_173;
-    spatial_vector var_174;
+    df::float3 var_174;
     spatial_vector var_175;
-    df::float3 var_176;
+    spatial_vector var_176;
     df::float3 var_177;
     df::float3 var_178;
     df::float3 var_179;
     df::float3 var_180;
     df::float3 var_181;
     df::float3 var_182;
-    float var_183;
-    df::float3 var_184;
+    df::float3 var_183;
+    float var_184;
     df::float3 var_185;
     df::float3 var_186;
     df::float3 var_187;
-    float var_188;
+    df::float3 var_188;
     df::float3 var_189;
     df::float3 var_190;
     float var_191;
-    float var_192;
-    float var_193;
-    df::float3 var_194;
+    df::float3 var_192;
+    df::float3 var_193;
+    float var_194;
     float var_195;
     float var_196;
-    float var_197;
+    df::float3 var_197;
     float var_198;
     float var_199;
     float var_200;
-    df::float3 var_201;
+    float var_201;
     float var_202;
-    df::float3 var_203;
+    float var_203;
     df::float3 var_204;
-    df::float3 var_205;
+    float var_205;
     df::float3 var_206;
-    const int var_207 = 6;
-    bool var_208;
-    spatial_vector var_209;
-    spatial_vector var_210;
-    wrench_matrix var_211;
-    bool var_212;
+    float var_207;
+    float var_208;
+    float var_209;
+    float var_210;
+    float var_211;
+    float var_212;
     df::float3 var_213;
-    wrench_matrix var_214;
+    float var_214;
+    df::float3 var_215;
+    float var_216;
+    df::float3 var_217;
+    df::float3 var_218;
+    df::float3 var_219;
+    df::float3 var_220;
+    df::float3 var_221;
+    df::float3 var_222;
+    df::float3 var_223;
+    const int var_224 = 6;
+    bool var_225;
+    spatial_vector var_226;
+    spatial_vector var_227;
+    spatial_vector var_228;
+    spatial_vector var_229;
+    wrench_matrix var_230;
     //---------
     // dual vars
     int adj_0 = 0;
@@ -14422,84 +14488,100 @@ void eval_rigid_contacts_art_cpu_kernel_backward(
     float adj_134 = 0;
     float adj_135 = 0;
     float adj_136 = 0;
-    df::float3 adj_137 = 0;
-    float adj_138 = 0;
+    float adj_137 = 0;
+    df::float3 adj_138 = 0;
     float adj_139 = 0;
-    df::float3 adj_140 = 0;
-    float adj_141 = 0;
+    float adj_140 = 0;
+    df::float3 adj_141 = 0;
     float adj_142 = 0;
     float adj_143 = 0;
     float adj_144 = 0;
     float adj_145 = 0;
     float adj_146 = 0;
-    df::float3 adj_147 = 0;
-    float adj_148 = 0;
+    float adj_147 = 0;
+    df::float3 adj_148 = 0;
     float adj_149 = 0;
-    df::float3 adj_150 = 0;
-    float adj_151 = 0;
+    float adj_150 = 0;
+    df::float3 adj_151 = 0;
     float adj_152 = 0;
     float adj_153 = 0;
     float adj_154 = 0;
     float adj_155 = 0;
-    df::float3 adj_156 = 0;
-    float adj_157 = 0;
+    float adj_156 = 0;
+    df::float3 adj_157 = 0;
     float adj_158 = 0;
-    df::float3 adj_159 = 0;
-    float adj_160 = 0;
+    float adj_159 = 0;
+    df::float3 adj_160 = 0;
     float adj_161 = 0;
     float adj_162 = 0;
     float adj_163 = 0;
-    df::float3 adj_164 = 0;
+    float adj_164 = 0;
     df::float3 adj_165 = 0;
     df::float3 adj_166 = 0;
     df::float3 adj_167 = 0;
-    float adj_168 = 0;
+    df::float3 adj_168 = 0;
     float adj_169 = 0;
-    bool adj_170 = 0;
-    float adj_171 = 0;
-    df::float3 adj_172 = 0;
+    float adj_170 = 0;
+    bool adj_171 = 0;
+    float adj_172 = 0;
     df::float3 adj_173 = 0;
-    spatial_vector adj_174 = 0;
+    df::float3 adj_174 = 0;
     spatial_vector adj_175 = 0;
-    df::float3 adj_176 = 0;
+    spatial_vector adj_176 = 0;
     df::float3 adj_177 = 0;
     df::float3 adj_178 = 0;
     df::float3 adj_179 = 0;
     df::float3 adj_180 = 0;
     df::float3 adj_181 = 0;
     df::float3 adj_182 = 0;
-    float adj_183 = 0;
-    df::float3 adj_184 = 0;
+    df::float3 adj_183 = 0;
+    float adj_184 = 0;
     df::float3 adj_185 = 0;
     df::float3 adj_186 = 0;
     df::float3 adj_187 = 0;
-    float adj_188 = 0;
+    df::float3 adj_188 = 0;
     df::float3 adj_189 = 0;
     df::float3 adj_190 = 0;
     float adj_191 = 0;
-    float adj_192 = 0;
-    float adj_193 = 0;
-    df::float3 adj_194 = 0;
+    df::float3 adj_192 = 0;
+    df::float3 adj_193 = 0;
+    float adj_194 = 0;
     float adj_195 = 0;
     float adj_196 = 0;
-    float adj_197 = 0;
+    df::float3 adj_197 = 0;
     float adj_198 = 0;
     float adj_199 = 0;
     float adj_200 = 0;
-    df::float3 adj_201 = 0;
+    float adj_201 = 0;
     float adj_202 = 0;
-    df::float3 adj_203 = 0;
+    float adj_203 = 0;
     df::float3 adj_204 = 0;
-    df::float3 adj_205 = 0;
+    float adj_205 = 0;
     df::float3 adj_206 = 0;
-    int adj_207 = 0;
-    bool adj_208 = 0;
-    spatial_vector adj_209 = 0;
-    spatial_vector adj_210 = 0;
-    wrench_matrix adj_211 = 0;
-    bool adj_212 = 0;
+    float adj_207 = 0;
+    float adj_208 = 0;
+    float adj_209 = 0;
+    float adj_210 = 0;
+    float adj_211 = 0;
+    float adj_212 = 0;
     df::float3 adj_213 = 0;
-    wrench_matrix adj_214 = 0;
+    float adj_214 = 0;
+    df::float3 adj_215 = 0;
+    float adj_216 = 0;
+    df::float3 adj_217 = 0;
+    df::float3 adj_218 = 0;
+    df::float3 adj_219 = 0;
+    df::float3 adj_220 = 0;
+    df::float3 adj_221 = 0;
+    df::float3 adj_222 = 0;
+    df::float3 adj_223 = 0;
+    int adj_224 = 0;
+    bool adj_225 = 0;
+    spatial_vector adj_226 = 0;
+    spatial_vector adj_227 = 0;
+    spatial_vector adj_228 = 0;
+    spatial_vector adj_229 = 0;
+    wrench_matrix adj_230 = 0;
     //---------
     // forward
     var_0 = df::tid();
@@ -14638,194 +14720,227 @@ void eval_rigid_contacts_art_cpu_kernel_backward(
     	var_128 = get_sdf_cpu_func(var_92, var_82, var_geo_sdf, var_0);
     	var_129 = df::sub(var_128, var_6);
     	var_130 = df::sub(var_129, var_66);
-    	var_131 = df::leaky_min(var_130, var_29, var_119);
-    	var_133 = df::index(var_82, var_8);
-    	var_134 = df::index(var_82, var_9);
-    	var_135 = df::index(var_82, var_20);
-    	var_136 = df::add(var_133, var_132);
-    	var_137 = df::float3(var_136, var_134, var_135);
-    	var_138 = get_sdf_cpu_func(var_92, var_137, var_geo_sdf, var_0);
-    	var_139 = df::sub(var_133, var_132);
-    	var_140 = df::float3(var_139, var_134, var_135);
-    	var_141 = get_sdf_cpu_func(var_92, var_140, var_geo_sdf, var_0);
-    	var_142 = df::sub(var_138, var_141);
-    	var_144 = df::mul(var_143, var_132);
-    	var_145 = df::div(var_142, var_144);
-    	var_146 = df::add(var_134, var_132);
-    	var_147 = df::float3(var_133, var_146, var_135);
-    	var_148 = get_sdf_cpu_func(var_92, var_147, var_geo_sdf, var_0);
-    	var_149 = df::sub(var_134, var_132);
-    	var_150 = df::float3(var_133, var_149, var_135);
-    	var_151 = get_sdf_cpu_func(var_92, var_150, var_geo_sdf, var_0);
-    	var_152 = df::sub(var_148, var_151);
-    	var_153 = df::mul(var_143, var_132);
-    	var_154 = df::div(var_152, var_153);
-    	var_155 = df::add(var_135, var_132);
-    	var_156 = df::float3(var_133, var_134, var_155);
-    	var_157 = get_sdf_cpu_func(var_92, var_156, var_geo_sdf, var_0);
-    	var_158 = df::sub(var_135, var_132);
-    	var_159 = df::float3(var_133, var_134, var_158);
-    	var_160 = get_sdf_cpu_func(var_92, var_159, var_geo_sdf, var_0);
-    	var_161 = df::sub(var_157, var_160);
-    	var_162 = df::mul(var_143, var_132);
-    	var_163 = df::div(var_161, var_162);
-    	var_164 = df::float3(var_145, var_154, var_163);
-    	var_165 = df::normalize(var_164);
-    	var_166 = df::spatial_transform_vector(var_80, var_165);
+    	var_131 = df::sub(var_129, var_66);
+    	var_132 = df::leaky_min(var_131, var_29, var_119);
+    	var_134 = df::index(var_82, var_8);
+    	var_135 = df::index(var_82, var_9);
+    	var_136 = df::index(var_82, var_20);
+    	var_137 = df::add(var_134, var_133);
+    	var_138 = df::float3(var_137, var_135, var_136);
+    	var_139 = get_sdf_cpu_func(var_92, var_138, var_geo_sdf, var_0);
+    	var_140 = df::sub(var_134, var_133);
+    	var_141 = df::float3(var_140, var_135, var_136);
+    	var_142 = get_sdf_cpu_func(var_92, var_141, var_geo_sdf, var_0);
+    	var_143 = df::sub(var_139, var_142);
+    	var_145 = df::mul(var_144, var_133);
+    	var_146 = df::div(var_143, var_145);
+    	var_147 = df::add(var_135, var_133);
+    	var_148 = df::float3(var_134, var_147, var_136);
+    	var_149 = get_sdf_cpu_func(var_92, var_148, var_geo_sdf, var_0);
+    	var_150 = df::sub(var_135, var_133);
+    	var_151 = df::float3(var_134, var_150, var_136);
+    	var_152 = get_sdf_cpu_func(var_92, var_151, var_geo_sdf, var_0);
+    	var_153 = df::sub(var_149, var_152);
+    	var_154 = df::mul(var_144, var_133);
+    	var_155 = df::div(var_153, var_154);
+    	var_156 = df::add(var_136, var_133);
+    	var_157 = df::float3(var_134, var_135, var_156);
+    	var_158 = get_sdf_cpu_func(var_92, var_157, var_geo_sdf, var_0);
+    	var_159 = df::sub(var_136, var_133);
+    	var_160 = df::float3(var_134, var_135, var_159);
+    	var_161 = get_sdf_cpu_func(var_92, var_160, var_geo_sdf, var_0);
+    	var_162 = df::sub(var_158, var_161);
+    	var_163 = df::mul(var_144, var_133);
+    	var_164 = df::div(var_162, var_163);
+    	var_165 = df::float3(var_146, var_155, var_164);
+    	var_166 = df::normalize(var_165);
+    	var_167 = df::spatial_transform_vector(var_80, var_166);
     }
-    var_167 = df::select(var_127, var_125, var_166);
-    var_168 = df::select(var_127, var_126, var_131);
-    var_169 = df::select(var_127, var_113, var_129);
-    var_170 = (var_83 == var_8);
-    if (var_170) {
-    	var_171 = df::sub(var_29, var_30);
-    	var_172 = df::mul(var_167, var_171);
+    var_168 = df::select(var_127, var_125, var_167);
+    var_169 = df::select(var_127, var_126, var_132);
+    var_170 = df::select(var_127, var_113, var_129);
+    var_171 = (var_83 == var_8);
+    if (var_171) {
+    	var_172 = df::sub(var_29, var_30);
+    	var_173 = df::mul(var_168, var_172);
     }
-    var_173 = df::select(var_170, var_90, var_172);
-    var_174 = df::spatial_vector();
-    var_175 = df::load(var_body_v_s, var_2);
-    var_176 = df::spatial_top(var_175);
-    var_177 = df::spatial_bottom(var_175);
-    var_178 = df::spatial_transform_get_translation(var_78);
-    var_179 = df::sub(var_71, var_178);
-    var_180 = df::cross(var_176, var_179);
-    var_181 = df::add(var_177, var_180);
-    var_182 = df::sub(var_77, var_181);
-    var_183 = df::dot(var_167, var_182);
-    var_184 = df::mul(var_167, var_183);
-    var_185 = df::sub(var_182, var_184);
-    var_186 = df::mul(var_167, var_168);
-    var_187 = df::mul(var_186, var_65);
-    var_188 = df::min(var_183, var_29);
-    var_189 = df::mul(var_167, var_188);
-    var_190 = df::mul(var_189, var_66);
-    var_191 = df::mul(var_168, var_65);
-    var_192 = df::mul(var_68, var_191);
-    var_193 = df::sub(var_29, var_192);
-    var_194 = df::normalize(var_185);
-    var_195 = df::length(var_185);
-    var_196 = df::mul(var_195, var_67);
-    var_197 = df::mul(var_196, var_168);
-    var_198 = df::mul(var_168, var_65);
-    var_199 = df::mul(var_68, var_198);
-    var_200 = df::max(var_197, var_199);
-    var_201 = df::mul(var_194, var_200);
-    var_202 = df::sub(var_29, var_30);
-    var_203 = df::mul(var_201, var_202);
-    var_204 = df::add(var_187, var_203);
-    var_205 = df::cross(var_75, var_204);
-    var_206 = df::cross(var_179, var_204);
-    var_208 = (var_2 == var_207);
-    if (var_208) {
-    	var_209 = df::spatial_vector(var_206, var_204);
-    	df::atomic_sub(var_body_f_s, var_2, var_209);
+    var_174 = df::select(var_171, var_90, var_173);
+    var_175 = df::spatial_vector();
+    var_176 = df::load(var_body_v_s, var_2);
+    var_177 = df::spatial_top(var_176);
+    var_178 = df::spatial_bottom(var_176);
+    var_179 = df::spatial_transform_get_translation(var_78);
+    var_180 = df::sub(var_71, var_179);
+    var_181 = df::cross(var_177, var_180);
+    var_182 = df::add(var_178, var_181);
+    var_183 = df::sub(var_77, var_182);
+    var_184 = df::dot(var_168, var_183);
+    var_185 = df::mul(var_168, var_184);
+    var_186 = df::sub(var_183, var_185);
+    var_187 = df::mul(var_168, var_169);
+    var_188 = df::mul(var_187, var_65);
+    var_189 = df::mul(var_168, var_65);
+    var_190 = df::mul(var_168, var_130);
+    var_191 = df::min(var_184, var_29);
+    var_192 = df::mul(var_168, var_191);
+    var_193 = df::mul(var_192, var_66);
+    var_194 = df::mul(var_169, var_65);
+    var_195 = df::mul(var_68, var_194);
+    var_196 = df::sub(var_29, var_195);
+    var_197 = df::normalize(var_186);
+    var_198 = df::length(var_186);
+    var_199 = df::mul(var_198, var_67);
+    var_200 = df::mul(var_199, var_169);
+    var_201 = df::mul(var_169, var_65);
+    var_202 = df::mul(var_68, var_201);
+    var_203 = df::max(var_200, var_202);
+    var_204 = df::mul(var_197, var_203);
+    var_205 = df::sub(var_29, var_30);
+    var_206 = df::mul(var_204, var_205);
+    var_207 = df::length(var_186);
+    var_208 = df::mul(var_207, var_67);
+    var_209 = df::mul(var_208, var_130);
+    var_210 = df::mul(var_130, var_65);
+    var_211 = df::mul(var_68, var_210);
+    var_212 = df::max(var_209, var_211);
+    var_213 = df::mul(var_197, var_212);
+    var_214 = df::sub(var_29, var_30);
+    var_215 = df::mul(var_213, var_214);
+    var_216 = df::div(var_30, var_65);
+    var_217 = df::mul(var_215, var_216);
+    var_218 = df::add(var_188, var_206);
+    var_219 = df::add(var_190, var_217);
+    var_220 = df::cross(var_75, var_218);
+    var_221 = df::cross(var_180, var_218);
+    var_222 = df::cross(var_180, var_189);
+    var_223 = df::cross(var_180, var_219);
+    var_225 = (var_2 == var_224);
+    if (var_225) {
+    	var_226 = df::spatial_vector(var_221, var_218);
+    	df::atomic_sub(var_body_f_s, var_2, var_226);
     }
-    var_210 = df::spatial_vector(var_206, var_204);
-    df::atomic_sub(var_contact_f_s, var_0, var_210);
-    df::store(var_contact_world_dist_out, var_0, var_169);
+    var_227 = df::spatial_vector(var_221, var_218);
+    df::atomic_sub(var_contact_f_s, var_0, var_227);
+    var_228 = df::spatial_vector(var_222, var_189);
+    df::atomic_sub(var_contact_f_s_normal, var_0, var_228);
+    var_229 = df::spatial_vector(var_223, var_219);
+    df::atomic_sub(var_contact_leaky_f_s, var_0, var_229);
+    df::store(var_contact_world_dist_out, var_0, var_170);
     df::store(var_contact_world_pos_out, var_0, var_71);
-    df::store(var_contact_world_n_out, var_0, var_167);
-    var_211 = df::wrench_grasp(var_179);
-    df::store(var_contact_matrix, var_0, var_211);
-    var_212 = (var_169 > var_8);
-    if (var_212) {
-    	var_213 = df::float3(var_29, var_29, var_29);
-    	var_214 = df::wrench_grasp(var_213);
-    	df::store(var_contact_matrix, var_0, var_214);
-    }
+    df::store(var_contact_local_pos_out, var_0, var_82);
+    df::store(var_contact_world_n_out, var_0, var_168);
+    var_230 = df::wrench_grasp(var_180);
+    df::store(var_contact_matrix, var_0, var_230);
     //---------
     // reverse
-    if (var_212) {
-    	df::adj_store(var_contact_matrix, var_0, var_214, adj_contact_matrix, adj_0, adj_214);
-    	df::adj_wrench_grasp(var_213, adj_213, adj_214);
-    	df::adj_float3(var_29, var_29, var_29, adj_29, adj_29, adj_29, adj_213);
-    }
-    df::adj_store(var_contact_matrix, var_0, var_211, adj_contact_matrix, adj_0, adj_211);
-    df::adj_wrench_grasp(var_179, adj_179, adj_211);
-    df::adj_store(var_contact_world_n_out, var_0, var_167, adj_contact_world_n_out, adj_0, adj_167);
+    df::adj_store(var_contact_matrix, var_0, var_230, adj_contact_matrix, adj_0, adj_230);
+    df::adj_wrench_grasp(var_180, adj_180, adj_230);
+    df::adj_store(var_contact_world_n_out, var_0, var_168, adj_contact_world_n_out, adj_0, adj_168);
+    df::adj_store(var_contact_local_pos_out, var_0, var_82, adj_contact_local_pos_out, adj_0, adj_82);
     df::adj_store(var_contact_world_pos_out, var_0, var_71, adj_contact_world_pos_out, adj_0, adj_71);
-    df::adj_store(var_contact_world_dist_out, var_0, var_169, adj_contact_world_dist_out, adj_0, adj_169);
-    df::adj_atomic_sub(var_contact_f_s, var_0, var_210, adj_contact_f_s, adj_0, adj_210);
-    df::adj_spatial_vector(var_206, var_204, adj_206, adj_204, adj_210);
-    if (var_208) {
-    	df::adj_atomic_sub(var_body_f_s, var_2, var_209, adj_body_f_s, adj_2, adj_209);
-    	df::adj_spatial_vector(var_206, var_204, adj_206, adj_204, adj_209);
+    df::adj_store(var_contact_world_dist_out, var_0, var_170, adj_contact_world_dist_out, adj_0, adj_170);
+    df::adj_atomic_sub(var_contact_leaky_f_s, var_0, var_229, adj_contact_leaky_f_s, adj_0, adj_229);
+    df::adj_spatial_vector(var_223, var_219, adj_223, adj_219, adj_229);
+    df::adj_atomic_sub(var_contact_f_s_normal, var_0, var_228, adj_contact_f_s_normal, adj_0, adj_228);
+    df::adj_spatial_vector(var_222, var_189, adj_222, adj_189, adj_228);
+    df::adj_atomic_sub(var_contact_f_s, var_0, var_227, adj_contact_f_s, adj_0, adj_227);
+    df::adj_spatial_vector(var_221, var_218, adj_221, adj_218, adj_227);
+    if (var_225) {
+    	df::adj_atomic_sub(var_body_f_s, var_2, var_226, adj_body_f_s, adj_2, adj_226);
+    	df::adj_spatial_vector(var_221, var_218, adj_221, adj_218, adj_226);
     }
-    df::adj_cross(var_179, var_204, adj_179, adj_204, adj_206);
-    df::adj_cross(var_75, var_204, adj_75, adj_204, adj_205);
-    df::adj_add(var_187, var_203, adj_187, adj_203, adj_204);
-    df::adj_mul(var_201, var_202, adj_201, adj_202, adj_203);
-    df::adj_sub(var_29, var_30, adj_29, adj_30, adj_202);
-    df::adj_mul(var_194, var_200, adj_194, adj_200, adj_201);
-    df::adj_max(var_197, var_199, adj_197, adj_199, adj_200);
-    df::adj_mul(var_68, var_198, adj_68, adj_198, adj_199);
-    df::adj_mul(var_168, var_65, adj_168, adj_65, adj_198);
-    df::adj_mul(var_196, var_168, adj_196, adj_168, adj_197);
-    df::adj_mul(var_195, var_67, adj_195, adj_67, adj_196);
-    df::adj_length(var_185, adj_185, adj_195);
-    df::adj_normalize(var_185, adj_185, adj_194);
-    df::adj_sub(var_29, var_192, adj_29, adj_192, adj_193);
-    df::adj_mul(var_68, var_191, adj_68, adj_191, adj_192);
-    df::adj_mul(var_168, var_65, adj_168, adj_65, adj_191);
-    df::adj_mul(var_189, var_66, adj_189, adj_66, adj_190);
-    df::adj_mul(var_167, var_188, adj_167, adj_188, adj_189);
-    df::adj_min(var_183, var_29, adj_183, adj_29, adj_188);
-    df::adj_mul(var_186, var_65, adj_186, adj_65, adj_187);
-    df::adj_mul(var_167, var_168, adj_167, adj_168, adj_186);
-    df::adj_sub(var_182, var_184, adj_182, adj_184, adj_185);
-    df::adj_mul(var_167, var_183, adj_167, adj_183, adj_184);
-    df::adj_dot(var_167, var_182, adj_167, adj_182, adj_183);
-    df::adj_sub(var_77, var_181, adj_77, adj_181, adj_182);
-    df::adj_add(var_177, var_180, adj_177, adj_180, adj_181);
-    df::adj_cross(var_176, var_179, adj_176, adj_179, adj_180);
-    df::adj_sub(var_71, var_178, adj_71, adj_178, adj_179);
-    df::adj_spatial_transform_get_translation(var_78, adj_78, adj_178);
-    df::adj_spatial_bottom(var_175, adj_175, adj_177);
-    df::adj_spatial_top(var_175, adj_175, adj_176);
-    df::adj_load(var_body_v_s, var_2, adj_body_v_s, adj_2, adj_175);
-    df::adj_select(var_170, var_90, var_172, adj_170, adj_90, adj_172, adj_173);
-    if (var_170) {
-    	df::adj_mul(var_167, var_171, adj_167, adj_171, adj_172);
-    	df::adj_sub(var_29, var_30, adj_29, adj_30, adj_171);
+    df::adj_cross(var_180, var_219, adj_180, adj_219, adj_223);
+    df::adj_cross(var_180, var_189, adj_180, adj_189, adj_222);
+    df::adj_cross(var_180, var_218, adj_180, adj_218, adj_221);
+    df::adj_cross(var_75, var_218, adj_75, adj_218, adj_220);
+    df::adj_add(var_190, var_217, adj_190, adj_217, adj_219);
+    df::adj_add(var_188, var_206, adj_188, adj_206, adj_218);
+    df::adj_mul(var_215, var_216, adj_215, adj_216, adj_217);
+    df::adj_div(var_30, var_65, adj_30, adj_65, adj_216);
+    df::adj_mul(var_213, var_214, adj_213, adj_214, adj_215);
+    df::adj_sub(var_29, var_30, adj_29, adj_30, adj_214);
+    df::adj_mul(var_197, var_212, adj_197, adj_212, adj_213);
+    df::adj_max(var_209, var_211, adj_209, adj_211, adj_212);
+    df::adj_mul(var_68, var_210, adj_68, adj_210, adj_211);
+    df::adj_mul(var_130, var_65, adj_130, adj_65, adj_210);
+    df::adj_mul(var_208, var_130, adj_208, adj_130, adj_209);
+    df::adj_mul(var_207, var_67, adj_207, adj_67, adj_208);
+    df::adj_length(var_186, adj_186, adj_207);
+    df::adj_mul(var_204, var_205, adj_204, adj_205, adj_206);
+    df::adj_sub(var_29, var_30, adj_29, adj_30, adj_205);
+    df::adj_mul(var_197, var_203, adj_197, adj_203, adj_204);
+    df::adj_max(var_200, var_202, adj_200, adj_202, adj_203);
+    df::adj_mul(var_68, var_201, adj_68, adj_201, adj_202);
+    df::adj_mul(var_169, var_65, adj_169, adj_65, adj_201);
+    df::adj_mul(var_199, var_169, adj_199, adj_169, adj_200);
+    df::adj_mul(var_198, var_67, adj_198, adj_67, adj_199);
+    df::adj_length(var_186, adj_186, adj_198);
+    df::adj_normalize(var_186, adj_186, adj_197);
+    df::adj_sub(var_29, var_195, adj_29, adj_195, adj_196);
+    df::adj_mul(var_68, var_194, adj_68, adj_194, adj_195);
+    df::adj_mul(var_169, var_65, adj_169, adj_65, adj_194);
+    df::adj_mul(var_192, var_66, adj_192, adj_66, adj_193);
+    df::adj_mul(var_168, var_191, adj_168, adj_191, adj_192);
+    df::adj_min(var_184, var_29, adj_184, adj_29, adj_191);
+    df::adj_mul(var_168, var_130, adj_168, adj_130, adj_190);
+    df::adj_mul(var_168, var_65, adj_168, adj_65, adj_189);
+    df::adj_mul(var_187, var_65, adj_187, adj_65, adj_188);
+    df::adj_mul(var_168, var_169, adj_168, adj_169, adj_187);
+    df::adj_sub(var_183, var_185, adj_183, adj_185, adj_186);
+    df::adj_mul(var_168, var_184, adj_168, adj_184, adj_185);
+    df::adj_dot(var_168, var_183, adj_168, adj_183, adj_184);
+    df::adj_sub(var_77, var_182, adj_77, adj_182, adj_183);
+    df::adj_add(var_178, var_181, adj_178, adj_181, adj_182);
+    df::adj_cross(var_177, var_180, adj_177, adj_180, adj_181);
+    df::adj_sub(var_71, var_179, adj_71, adj_179, adj_180);
+    df::adj_spatial_transform_get_translation(var_78, adj_78, adj_179);
+    df::adj_spatial_bottom(var_176, adj_176, adj_178);
+    df::adj_spatial_top(var_176, adj_176, adj_177);
+    df::adj_load(var_body_v_s, var_2, adj_body_v_s, adj_2, adj_176);
+    df::adj_select(var_171, var_90, var_173, adj_171, adj_90, adj_173, adj_174);
+    if (var_171) {
+    	df::adj_mul(var_168, var_172, adj_168, adj_172, adj_173);
+    	df::adj_sub(var_29, var_30, adj_29, adj_30, adj_172);
     }
-    df::adj_select(var_127, var_113, var_129, adj_127, adj_113, adj_129, adj_169);
-    df::adj_select(var_127, var_126, var_131, adj_127, adj_126, adj_131, adj_168);
-    df::adj_select(var_127, var_125, var_166, adj_127, adj_125, adj_166, adj_167);
+    df::adj_select(var_127, var_113, var_129, adj_127, adj_113, adj_129, adj_170);
+    df::adj_select(var_127, var_126, var_132, adj_127, adj_126, adj_132, adj_169);
+    df::adj_select(var_127, var_125, var_167, adj_127, adj_125, adj_167, adj_168);
     if (var_127) {
-    	df::adj_spatial_transform_vector(var_80, var_165, adj_80, adj_165, adj_166);
-    	df::adj_normalize(var_164, adj_164, adj_165);
-    	df::adj_float3(var_145, var_154, var_163, adj_145, adj_154, adj_163, adj_164);
-    	df::adj_div(var_161, var_162, adj_161, adj_162, adj_163);
-    	df::adj_mul(var_143, var_132, adj_143, adj_132, adj_162);
-    	df::adj_sub(var_157, var_160, adj_157, adj_160, adj_161);
-    	adj_get_sdf_cpu_func(var_92, var_159, var_geo_sdf, var_0, adj_92, adj_159, adj_geo_sdf, adj_0, adj_160);
-    	df::adj_float3(var_133, var_134, var_158, adj_133, adj_134, adj_158, adj_159);
-    	df::adj_sub(var_135, var_132, adj_135, adj_132, adj_158);
-    	adj_get_sdf_cpu_func(var_92, var_156, var_geo_sdf, var_0, adj_92, adj_156, adj_geo_sdf, adj_0, adj_157);
-    	df::adj_float3(var_133, var_134, var_155, adj_133, adj_134, adj_155, adj_156);
-    	df::adj_add(var_135, var_132, adj_135, adj_132, adj_155);
-    	df::adj_div(var_152, var_153, adj_152, adj_153, adj_154);
-    	df::adj_mul(var_143, var_132, adj_143, adj_132, adj_153);
-    	df::adj_sub(var_148, var_151, adj_148, adj_151, adj_152);
-    	adj_get_sdf_cpu_func(var_92, var_150, var_geo_sdf, var_0, adj_92, adj_150, adj_geo_sdf, adj_0, adj_151);
-    	df::adj_float3(var_133, var_149, var_135, adj_133, adj_149, adj_135, adj_150);
-    	df::adj_sub(var_134, var_132, adj_134, adj_132, adj_149);
-    	adj_get_sdf_cpu_func(var_92, var_147, var_geo_sdf, var_0, adj_92, adj_147, adj_geo_sdf, adj_0, adj_148);
-    	df::adj_float3(var_133, var_146, var_135, adj_133, adj_146, adj_135, adj_147);
-    	df::adj_add(var_134, var_132, adj_134, adj_132, adj_146);
-    	df::adj_div(var_142, var_144, adj_142, adj_144, adj_145);
-    	df::adj_mul(var_143, var_132, adj_143, adj_132, adj_144);
-    	df::adj_sub(var_138, var_141, adj_138, adj_141, adj_142);
-    	adj_get_sdf_cpu_func(var_92, var_140, var_geo_sdf, var_0, adj_92, adj_140, adj_geo_sdf, adj_0, adj_141);
-    	df::adj_float3(var_139, var_134, var_135, adj_139, adj_134, adj_135, adj_140);
-    	df::adj_sub(var_133, var_132, adj_133, adj_132, adj_139);
-    	adj_get_sdf_cpu_func(var_92, var_137, var_geo_sdf, var_0, adj_92, adj_137, adj_geo_sdf, adj_0, adj_138);
-    	df::adj_float3(var_136, var_134, var_135, adj_136, adj_134, adj_135, adj_137);
-    	df::adj_add(var_133, var_132, adj_133, adj_132, adj_136);
-    	df::adj_index(var_82, var_20, adj_82, adj_20, adj_135);
-    	df::adj_index(var_82, var_9, adj_82, adj_9, adj_134);
-    	df::adj_index(var_82, var_8, adj_82, adj_8, adj_133);
-    	df::adj_leaky_min(var_130, var_29, var_119, adj_130, adj_29, adj_119, adj_131);
+    	df::adj_spatial_transform_vector(var_80, var_166, adj_80, adj_166, adj_167);
+    	df::adj_normalize(var_165, adj_165, adj_166);
+    	df::adj_float3(var_146, var_155, var_164, adj_146, adj_155, adj_164, adj_165);
+    	df::adj_div(var_162, var_163, adj_162, adj_163, adj_164);
+    	df::adj_mul(var_144, var_133, adj_144, adj_133, adj_163);
+    	df::adj_sub(var_158, var_161, adj_158, adj_161, adj_162);
+    	adj_get_sdf_cpu_func(var_92, var_160, var_geo_sdf, var_0, adj_92, adj_160, adj_geo_sdf, adj_0, adj_161);
+    	df::adj_float3(var_134, var_135, var_159, adj_134, adj_135, adj_159, adj_160);
+    	df::adj_sub(var_136, var_133, adj_136, adj_133, adj_159);
+    	adj_get_sdf_cpu_func(var_92, var_157, var_geo_sdf, var_0, adj_92, adj_157, adj_geo_sdf, adj_0, adj_158);
+    	df::adj_float3(var_134, var_135, var_156, adj_134, adj_135, adj_156, adj_157);
+    	df::adj_add(var_136, var_133, adj_136, adj_133, adj_156);
+    	df::adj_div(var_153, var_154, adj_153, adj_154, adj_155);
+    	df::adj_mul(var_144, var_133, adj_144, adj_133, adj_154);
+    	df::adj_sub(var_149, var_152, adj_149, adj_152, adj_153);
+    	adj_get_sdf_cpu_func(var_92, var_151, var_geo_sdf, var_0, adj_92, adj_151, adj_geo_sdf, adj_0, adj_152);
+    	df::adj_float3(var_134, var_150, var_136, adj_134, adj_150, adj_136, adj_151);
+    	df::adj_sub(var_135, var_133, adj_135, adj_133, adj_150);
+    	adj_get_sdf_cpu_func(var_92, var_148, var_geo_sdf, var_0, adj_92, adj_148, adj_geo_sdf, adj_0, adj_149);
+    	df::adj_float3(var_134, var_147, var_136, adj_134, adj_147, adj_136, adj_148);
+    	df::adj_add(var_135, var_133, adj_135, adj_133, adj_147);
+    	df::adj_div(var_143, var_145, adj_143, adj_145, adj_146);
+    	df::adj_mul(var_144, var_133, adj_144, adj_133, adj_145);
+    	df::adj_sub(var_139, var_142, adj_139, adj_142, adj_143);
+    	adj_get_sdf_cpu_func(var_92, var_141, var_geo_sdf, var_0, adj_92, adj_141, adj_geo_sdf, adj_0, adj_142);
+    	df::adj_float3(var_140, var_135, var_136, adj_140, adj_135, adj_136, adj_141);
+    	df::adj_sub(var_134, var_133, adj_134, adj_133, adj_140);
+    	adj_get_sdf_cpu_func(var_92, var_138, var_geo_sdf, var_0, adj_92, adj_138, adj_geo_sdf, adj_0, adj_139);
+    	df::adj_float3(var_137, var_135, var_136, adj_137, adj_135, adj_136, adj_138);
+    	df::adj_add(var_134, var_133, adj_134, adj_133, adj_137);
+    	df::adj_index(var_82, var_20, adj_82, adj_20, adj_136);
+    	df::adj_index(var_82, var_9, adj_82, adj_9, adj_135);
+    	df::adj_index(var_82, var_8, adj_82, adj_8, adj_134);
+    	df::adj_leaky_min(var_131, var_29, var_119, adj_131, adj_29, adj_119, adj_132);
+    	df::adj_sub(var_129, var_66, adj_129, adj_66, adj_131);
     	df::adj_sub(var_129, var_66, adj_129, adj_66, adj_130);
     	df::adj_sub(var_128, var_6, adj_128, adj_6, adj_129);
     	adj_get_sdf_cpu_func(var_92, var_82, var_geo_sdf, var_0, adj_92, adj_82, adj_geo_sdf, adj_0, adj_128);
@@ -14984,7 +15099,10 @@ void eval_rigid_contacts_art_cpu_forward(int dim,
 	float var_alpha,
 	torch::Tensor var_body_f_s,
 	torch::Tensor var_contact_f_s,
+	torch::Tensor var_contact_f_s_normal,
+	torch::Tensor var_contact_leaky_f_s,
 	torch::Tensor var_contact_world_pos_out,
+	torch::Tensor var_contact_local_pos_out,
 	torch::Tensor var_contact_world_n_out,
 	torch::Tensor var_contact_world_dist_out,
 	torch::Tensor var_contact_matrix)
@@ -15015,7 +15133,10 @@ void eval_rigid_contacts_art_cpu_forward(int dim,
 			var_alpha,
 			cast<spatial_vector*>(var_body_f_s),
 			cast<spatial_vector*>(var_contact_f_s),
+			cast<spatial_vector*>(var_contact_f_s_normal),
+			cast<spatial_vector*>(var_contact_leaky_f_s),
 			cast<df::float3*>(var_contact_world_pos_out),
+			cast<df::float3*>(var_contact_local_pos_out),
 			cast<df::float3*>(var_contact_world_n_out),
 			cast<float*>(var_contact_world_dist_out),
 			cast<wrench_matrix*>(var_contact_matrix));
@@ -15044,7 +15165,10 @@ void eval_rigid_contacts_art_cpu_backward(int dim,
 	float var_alpha,
 	torch::Tensor var_body_f_s,
 	torch::Tensor var_contact_f_s,
+	torch::Tensor var_contact_f_s_normal,
+	torch::Tensor var_contact_leaky_f_s,
 	torch::Tensor var_contact_world_pos_out,
+	torch::Tensor var_contact_local_pos_out,
 	torch::Tensor var_contact_world_n_out,
 	torch::Tensor var_contact_world_dist_out,
 	torch::Tensor var_contact_matrix, 
@@ -15069,7 +15193,10 @@ void eval_rigid_contacts_art_cpu_backward(int dim,
 	float adj_alpha,
 	torch::Tensor adj_body_f_s,
 	torch::Tensor adj_contact_f_s,
+	torch::Tensor adj_contact_f_s_normal,
+	torch::Tensor adj_contact_leaky_f_s,
 	torch::Tensor adj_contact_world_pos_out,
+	torch::Tensor adj_contact_local_pos_out,
 	torch::Tensor adj_contact_world_n_out,
 	torch::Tensor adj_contact_world_dist_out,
 	torch::Tensor adj_contact_matrix)
@@ -15100,7 +15227,10 @@ void eval_rigid_contacts_art_cpu_backward(int dim,
 			var_alpha,
 			cast<spatial_vector*>(var_body_f_s),
 			cast<spatial_vector*>(var_contact_f_s),
+			cast<spatial_vector*>(var_contact_f_s_normal),
+			cast<spatial_vector*>(var_contact_leaky_f_s),
 			cast<df::float3*>(var_contact_world_pos_out),
+			cast<df::float3*>(var_contact_local_pos_out),
 			cast<df::float3*>(var_contact_world_n_out),
 			cast<float*>(var_contact_world_dist_out),
 			cast<wrench_matrix*>(var_contact_matrix), 
@@ -15125,7 +15255,10 @@ void eval_rigid_contacts_art_cpu_backward(int dim,
 			adj_alpha,
 			cast<spatial_vector*>(adj_body_f_s),
 			cast<spatial_vector*>(adj_contact_f_s),
+			cast<spatial_vector*>(adj_contact_f_s_normal),
+			cast<spatial_vector*>(adj_contact_leaky_f_s),
 			cast<df::float3*>(adj_contact_world_pos_out),
+			cast<df::float3*>(adj_contact_local_pos_out),
 			cast<df::float3*>(adj_contact_world_n_out),
 			cast<float*>(adj_contact_world_dist_out),
 			cast<wrench_matrix*>(adj_contact_matrix));
@@ -15157,7 +15290,10 @@ void eval_rigid_contacts_art_cpu_forward(int dim,
 	float var_alpha,
 	torch::Tensor var_body_f_s,
 	torch::Tensor var_contact_f_s,
+	torch::Tensor var_contact_f_s_normal,
+	torch::Tensor var_contact_leaky_f_s,
 	torch::Tensor var_contact_world_pos_out,
+	torch::Tensor var_contact_local_pos_out,
 	torch::Tensor var_contact_world_n_out,
 	torch::Tensor var_contact_world_dist_out,
 	torch::Tensor var_contact_matrix);
@@ -15184,7 +15320,10 @@ void eval_rigid_contacts_art_cpu_backward(int dim,
 	float var_alpha,
 	torch::Tensor var_body_f_s,
 	torch::Tensor var_contact_f_s,
+	torch::Tensor var_contact_f_s_normal,
+	torch::Tensor var_contact_leaky_f_s,
 	torch::Tensor var_contact_world_pos_out,
+	torch::Tensor var_contact_local_pos_out,
 	torch::Tensor var_contact_world_n_out,
 	torch::Tensor var_contact_world_dist_out,
 	torch::Tensor var_contact_matrix, 
@@ -15209,7 +15348,10 @@ void eval_rigid_contacts_art_cpu_backward(int dim,
 	float adj_alpha,
 	torch::Tensor adj_body_f_s,
 	torch::Tensor adj_contact_f_s,
+	torch::Tensor adj_contact_f_s_normal,
+	torch::Tensor adj_contact_leaky_f_s,
 	torch::Tensor adj_contact_world_pos_out,
+	torch::Tensor adj_contact_local_pos_out,
 	torch::Tensor adj_contact_world_n_out,
 	torch::Tensor adj_contact_world_dist_out,
 	torch::Tensor adj_contact_matrix);

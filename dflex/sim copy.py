@@ -1202,6 +1202,7 @@ def eval_rigid_contacts_art(
     kd: float, 
     kf: float, 
     mu: float, 
+    alpha: float,
     body_f_s: df.tensor(df.spatial_vector), 
     contact_f_s: df.tensor(df.spatial_vector),
     contact_world_pos_out: df.tensor(df.float3),
@@ -1364,15 +1365,16 @@ def eval_rigid_contacts_art(
     # GEO_SDF (4)
     if (geo_type == 4):
         d = get_sdf(geo_scale, x_local, geo_sdf, tid) - margin
-        # a = 0.0001
-        # if a == 0.0:
+        # alpha = 0.0001
+        # if alpha == 0.0:
         #     c = df.min(d, 0.0)
-        # if a != 0.0:
+        # if alpha != 0.0:
+        #     beta = 50.0
         #     if d < 0.0:
         #         c = d
         #     if d > 0.0:
-        #         c = a * (1.0-df.exp(0.0-50.0*d))
-        #     c = c - a
+        #         c = alpha * (1.0-df.exp(0.0-beta*d))
+        #     c = c - alpha
         c = df.leaky_min(d-kd, 0.0, 0.1)
 
         eps = 1e-5
@@ -1406,6 +1408,10 @@ def eval_rigid_contacts_art(
 
     # compute the body velocity at the particle position
     # moment arm for body 1
+    #rescale=0.15
+    #mesh_norm_factor=10.0
+    #com = df.float3(0.0-0.00431033,  0.00605037,  0.01653202)
+    #r1 = p - com*rescale*mesh_norm_factor
     r1 = p - df.spatial_transform_get_translation(X_sc)
     bv = rigid_v + df.cross(rigid_w, r1)
 
@@ -1472,15 +1478,18 @@ def eval_rigid_contacts_art(
     #if c_body0 == 26:
         #df.atomic_add(body_f_s, c_body0, df.spatial_vector(t_total0, f_total))
         #df.atomic_sub(contact_f_s,tid,df.spatial_vector(t_total0,f_total))
-    #if c_body1 == 26:
-    #df.atomic_sub(body_f_s, c_body1, df.spatial_vector(t_total1, f_total))
+    if c_body1 == 6:
+        df.atomic_sub(body_f_s, c_body1, df.spatial_vector(t_total1, f_total))
     #df.atomic_sub(contact_f_s,tid,df.spatial_vector(t_total1,f_total))
 
     # FOR RELAXATION just record, do not apply contact forces
     #df.atomic_sub(contact_f_s,tid,df.spatial_vector(t_total1,f_total))
+    #df.atomic_sub(body_f_s, c_body1, df.spatial_vector(t_total1, f_total))
     df.atomic_sub(contact_f_s,tid,df.spatial_vector(t_total1,f_total))
 
     df.store(contact_world_dist_out,tid,d)
+    df.store(contact_world_pos_out,tid,p)
+    df.store(contact_world_n_out,tid,n)
 
 @df.func
 def lerp(
@@ -2453,8 +2462,8 @@ def eval_rigid_integrate(
 
     # one thread per-articulation
     index = tid()
-    if index < 21:
-       return
+    #if index < 21:
+       #return
 
     type = df.load(joint_type, index)
     coord_start = df.load(joint_q_start, index)
@@ -2764,7 +2773,8 @@ class SemiImplicitIntegrator:
                             model.contact_ke,
                             model.contact_kd, 
                             model.contact_kf, 
-                            model.contact_mu,],
+                            model.contact_mu,
+                            model.contact_alpha],
                         outputs=[
                             state_out.body_f_s,
                             state_out.contact_f_s,

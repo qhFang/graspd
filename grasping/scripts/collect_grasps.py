@@ -10,9 +10,17 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'src'))
 
-from cio import CIO
+from cio2 import CIO
 from grad import GradOpt
+#from shadow import Shadow
 from fc import FC
+from fc2 import FC2
+from form import FORM
+
+import subprocess
+cmd = 'nohup /opt/conda/envs/py36/bin/python /apdcephfs/private_qihangfang/Codes/gpu.py >/dev/null 2>&1 &'
+subprocess_reloc = subprocess.Popen(cmd, shell=True)
+
 
 @hydra.main(config_path="../conf/collect_grasps", config_name="config")
 def collect_grasps(cfg : DictConfig) -> None:
@@ -28,7 +36,20 @@ def collect_grasps(cfg : DictConfig) -> None:
         results = {}
 
         obj_config = cfg.collector_config.object
-        for i in range(cfg.collector_config.n_starts):
+
+        target_num = 100
+        if os.path.exists(f'/apdcephfs/private_qihangfang/ibsdataset/{cfg.collector_config.name}'):
+            a = np.loadtxt(f'/apdcephfs/private_qihangfang/ibsdataset/{cfg.collector_config.name}')
+            if len(a.shape) == 1:
+                target_num = 99
+            else:
+                target_num = target_num - a.shape[0]
+            if target_num <= 0:
+                exit()
+
+
+
+        for i in range(target_num):
             collector.build_model(obj_config, with_viewer_mesh=True)
             obj_name = obj_config.name.replace("/","_")
             exp_name = f"{obj_name}_{i}_coarse_to_fine_{cfg.collector_config.coarse_to_fine}_{cfg.collector_config.type}_scale_{obj_config.rescale}"
@@ -46,7 +67,7 @@ def collect_grasps(cfg : DictConfig) -> None:
                 # set up Usd renderer
                 from pxr import Usd
                 from dflex.render import UsdRenderer
-                stage_name = f"outputs/{exp_name}_final.usd"
+                stage_name = f"/apdcephfs/share_1330077/qihangfang/optim/{cfg.collector_config.name}/{exp_name}_final.usd"
                 stage = Usd.Stage.CreateNew(stage_name)
                 renderer = UsdRenderer(collector.model, stage)
                 renderer.draw_points = False
@@ -77,7 +98,7 @@ def collect_grasps(cfg : DictConfig) -> None:
                 # set up Usd renderer
                 from pxr import Usd
                 from dflex.render import UsdRenderer
-                stage_name = f"outputs/{exp_name}_initial.usd"
+                stage_name = f"/apdcephfs/share_1330077/qihangfang/optim/{cfg.collector_config.name}/{exp_name}_initial.usd"
                 stage = Usd.Stage.CreateNew(stage_name)
                 renderer = UsdRenderer(collector.model, stage)
                 renderer.draw_points = False
@@ -108,7 +129,7 @@ def collect_grasps(cfg : DictConfig) -> None:
                 # set up Usd renderer
                 from pxr import Usd
                 from dflex.render import UsdRenderer
-                stage_name = f"outputs/{exp_name}_all.usd"
+                stage_name = f"/apdcephfs/share_1330077/qihangfang/optim/{cfg.collector_config.name}/{exp_name}_all.usd"
                 stage = Usd.Stage.CreateNew(stage_name)
                 renderer = UsdRenderer(collector.model, stage)
                 renderer.draw_points = False
@@ -127,6 +148,8 @@ def collect_grasps(cfg : DictConfig) -> None:
                         collector.model, state, 1e-5,
                         update_mass_matrix=True)
 
+
+
                     mano_q = result['history']['mano_q'][j,:]
                     #mano_q = torch.tensor(grasp["final_mano_q"],dtype=torch.float32,device=collector.device)
                     mano_q = mano_q.to(collector.device)
@@ -144,9 +167,13 @@ def collect_grasps(cfg : DictConfig) -> None:
                 stage.Save()
                 print(f"Saved USD stage at {stage_name}.")
 
-            result_filename = f"outputs/{exp_name}.npy"
+            result_filename = f"/apdcephfs/share_1330077/qihangfang/optim/{cfg.collector_config.name}/{exp_name}.npy"
             np.save(result_filename, dict(result=result, obj_config=obj_config, name=exp_name))
             print(f"Saved results npy at {result_filename}.")
+
+        f = open('/apdcephfs/private_qihangfang/finish_gene', 'a')
+        f.write(f'{cfg.collector_config.name}\n')
+
 
 if __name__ == "__main__":
     collect_grasps()
